@@ -1,0 +1,579 @@
+MCC,Type,Merchant Name,Abbreviated Airline Name
+3064,Flight,Adria Airways,ADRIA AIR
+3043,Flight,Aer Lingus,AERLING
+3287,Flight,Aero Coach Aviation,AEROCOAC
+3167,Flight,Aero Continente,AERO CONT
+3285,Flight,Aero Peru,AEROPERU
+3263,Flight,Aero Servicio Carabobo,ASERCA
+3286,Flight,Aero Nicaraguenses,AERO NIC
+3011,Flight,Aeroflot,AEROFLOT
+3030,Flight,Aerolineas Argentinas,AERO ARG
+3076,Flight,Aeromexico,AEROMEXI
+3083,Flight,Air Afrique,AIR AFRIQ
+3021,Flight,Air Algerie,AIRALGER
+3236,Flight,Air Arabia Airline,AIR ARAB
+3068,Flight,Air Astana,AIRSTANA
+3296,Flight,Air Berlin,AIRBERLIN
+3071,Flight,Air British Columbia,AIR B R C
+3009,Flight,Air Canada,AIR CAN
+4511,Flight,"Air Carriers, Airlines",not elsewhere classified
+3261,Flight,Air China,AIR CHINA
+3282,Flight,Air Djibouti,AIR DJIB
+3007,Flight,Air France,AIR FRAN
+3020,Flight,Air India,AIR-INDI
+3065,Flight,Air Inter,AIRINTER
+3280,Flight,Air Jamaica,AIR JAMA
+3044,Flight,Air Lanka,AIR LANKA
+3148,Flight,"Air Littoral, S.A.",LITTORAL
+3028,Flight,Air Malta,AIRMALTA
+3298,Flight,Air Mauritius,AIRMAURI
+3025,Flight,Air New Zealand Limited International,AIR NZ
+3267,Flight,Air Panama International,AIR PANA
+3266,Flight,Air Seychelles,AIR SEYC
+3177,Flight,AirTran Airways,AIRTRAN A
+3151,Flight,Air Zaire,AIRZAIRE
+3096,Flight,Air Zimbabwe,AIRZIMBA
+3256,Flight,Alaska Airlines Inc.,ALASKA A
+3013,Flight,ITA AIRWAYS,ITA SPA
+3161,Flight,All Nippon Airways,ANAAIR
+3252,Flight,ALM Antilean Airlines,ALM
+3253,Flight,America West,AMERWEST
+3001,Flight,American Airlines,AMERICAN
+3033,Flight,Ansett Airlines,ANSETT
+3098,Flight,Asiana Airlines,ASIANA
+3243,Flight,Austrian Air Service,AUSTRAIR
+3051,Flight,Austrian Airlines,AUSTRIAN
+3242,Flight,Avensa,AVENSA
+3053,Flight,AVIACO (Spain),AVIACO
+3039,Flight,Avianca,AVIANCA
+3241,Flight,Aviateca (Guatemala),AVIATECA
+3300,Flight,Azul Brazilian Airlines,AZUL AIR
+3301,Flight,Wizz Airlines,WIZZ AIR
+3240,Flight,Bahamasair,BAHAMASA
+3041,Flight,Balkan: Bulgarian Airlines,BALKAN
+3239,Flight,Bar Harbor Airlines,BARHARBO
+3106,Flight,Braathens S.A.F.E. (Norway),BRAATHEN
+3005,Flight,British Airways,BRITISH A
+3111,Flight,British Midland,BRITISH M
+3171,Flight,Canadian Airlines,CANADIAN
+3234,Flight,Caribbean Airlines,CARIBBEAN
+3099,Flight,Cathay Pacific,CATHAYPA
+3072,Flight,Cebu Pacific,CEBU PAC
+3078,Flight,China Airlines,CHINAAIR
+3206,Flight,China Eastern Airlines,CHINAEAST
+3308,Flight,China Southern,CSAIR
+3223,Flight,Comair,COMAIR
+3222,Flight,Command Airways,COMMAND
+3220,Flight,Compania Faucett,COMPANIA
+3219,Flight,Compania Panamena de Aviacion (Copa),COPA
+3061,Flight,Continental,CONTINEN
+3088,Flight,Croatia Air,CROATIA
+3046,Flight,Cruzeiro do Sul (Brazil),CRUZEIRO
+3217,Flight,CSA Ceskoslovenske Aerolinie,CSA
+3292,Flight,Cyprus Airways,CYPRUSA
+3059,Flight,DBA Airlines,DBA AIR
+3058,Flight,Delta,DELTA
+3212,Flight,Dominicana de Aviacion,DOMINICA
+3004,Flight,Dragonair,DRAGONAIR
+3245,Flight,EasyJet,EASYJET
+3019,Flight,Eastern Airlines,Eastern
+3293,Flight,Ecuatoriana,ECUATORI
+3037,Flight,EgyptAir,EGYPTAIR
+3032,Flight,El Al,EL AL
+3026,Flight,Emirates Airlines,EMIRATES
+3294,Flight,Ethiopian Airlines,ETHIOPIA
+3034,Flight,Etihad Airways,ETIHADAIR
+3003,Flight,Eurofly,EUROFLY
+3084,Flight,Eva Airways,EVA AIR
+3042,Flight,Finnair,FINNAIR
+3302,Flight,Flybe LTD,FLYBEAIR
+3070,Flight,Fly Dubai,FLYDUBAI
+3204,Flight,Freedom Airlines,FREEDOM
+3132,Flight,Frontier Airlines,FRONTIER
+3103,Flight,Garuda (Indonesia),GARUDA
+3156,Flight,GO FLY Ltd.,GOFLY
+3247,Flight,Gol Airlines,GOL
+3040,Flight,Gulf Air (Bahrain),GULF AIR
+3200,Flight,Guyana Airways,GUYANA A
+3062,Flight,Hapag-Lloyd Express,HLX
+3197,Flight,Havasu Airlines,HAVASUAI
+3196,Flight,Hawaiian Air,HAWAIIAN
+3102,Flight,Iberia,IBERIA
+3050,Flight,Icelandair,ICELANDA
+3193,Flight,Indian Airlines,INDIAN A
+3191,Flight,Island Airlines,ISLANDAI
+3006,Flight,Japan Air Lines,JAL
+3056,Flight,Jet Airways,JET AIR
+3174,Flight,JetBlue Airways,JETBLUE
+3079,Flight,Jetstar Airways,JETSTAR
+3190,Flight,Jugoslav Air,JUGOSLAV
+3295,Flight,Kenya Airways,KENYAAIR
+3082,Flight,Korean Airlines,KOREAN
+3038,Flight,Kuwait Airways,KUWAIT
+3055,Flight,LAB (Bolivia),LAB
+3187,Flight,LACSA (Costa Rica),LACSA
+3054,Flight,LADECO (Chile),LADECO
+3052,Flight,LAN Airlines,LAN AIR
+3186,Flight,LAP Lineas Aereas Paraguayas,LAP
+3185,Flight,LAV Linea Aeropostal Venezolana,LAV
+3184,Flight,LIAT,LIAT
+3182,Flight,LOT – Polish Airlines,LOT
+3008,Flight,Lufthansa,LUFTHAN
+3146,Flight,Luxair,LUXAIR
+3100,Flight,Malaysian Airline System,MALAY AI
+3213,Flight,Braathens Regional Airlines,BRAATHENS
+3181,Flight,Malev Hungarian Airlines,MALEV
+3178,Flight,Mesa Air,MESA AIR
+3087,Flight,Metro Airlines,METROAI
+3023,Flight,Mexicana,MEXICANA
+3175,Flight,Middle East Air,MIDEASTA
+3085,Flight,Midwest Express Airlines,MIDWEST
+3172,Flight,Nation Air,NATIONAI
+3045,Flight,Nigeria Airways,NIGERIA
+3164,Flight,Norontair,NORONTAI
+3211,Flight,Norwegian Air Shuttle,NORWEGIAN
+3060,Flight,Northwest Airlines,NWA AIR
+3031,Flight,Olympic Airways,OLYMPICA
+3183,Flight,Oman Aviation Services,OMAN AIR
+3024,Flight,Pakistan International,PAKISTAN
+3002,Flight,Pan American,PAN AM
+3022,Flight,Philippine Airlines,PAL AIR
+3159,Flight,Provincetown-Boston Airways,PBA
+3012,Flight,Qantas,QANTAS
+3136,Flight,Qatar Airways Company W.L.L.,QATAR AIR
+3048,Flight,Royal Air Maroc,AIRMARO
+3010,Flight,Royal Dutch Airlines (KLM),KLM
+3246,Flight,Ryanair,RYANAIR
+3229,Flight,SAETA (Sociedad Ecuatorianas De Transportes Aereo),SAETAAIR
+3231,Flight,SAHSA (Servicio Aero de Honduras),SAHSA
+3014,Flight,Saudi Arabian Airlines,SAUDI AI
+3016,Flight,Scandinavian Airline System (SAS),SAS
+3075,Flight,Singapore Airlines,SINGAPOR
+3226,Flight,Skyways,SKYWAYS
+3029,Flight,SN Brussels Airlines,SNBRU AIR
+3017,Flight,South African Airways,SAFRICAN
+3066,Flight,Southwest Airlines,SOUTHWES
+3097,Flight,Spanair,SPANAIR
+3260,Flight,Spirit Airlines,SPIRIT
+3069,Flight,Sun Country Airlines,SUNCNTRY
+3130,Flight,Sunworld International Airways,SUNWORLD
+3129,Flight,Surinam Airways,SURINAM
+3015,Flight,Swiss International Air Lines,SWISS
+3080,Flight,Swoop Inc.,SWOOP
+3127,Flight,Taca International,TACA INT
+3248,Flight,Tam Airlines,TAM
+3125,Flight,Tan Airlines,TAN AIR
+3035,Flight,Tap (Portugal),TAP
+3297,Flight,Tarom Romanian Air Transport,TAROM AIR
+3077,Flight,Thai Airways,THAIAIRW
+3303,Flight,Tigerair,TIGERAIR
+3047,Flight,Turkish Airlines,THY
+3089,Flight,Transaero,TRANSAERO
+3221,Flight,Transportes Aeros Militares Ecuatorianos,TAME AIR
+3049,Flight,Tunis Air,TUNIS AI
+3063,Flight,U.S. Airways,USAIRWYS
+3090,Flight,Uni Airways,UNIAIR
+3027,Flight,Union de Transports Aeriens,UTAAIR
+3000,Flight,United Airlines,UNITED
+3067,Flight,Vanguard Airlines,VANGUARD
+3018,Flight,Varig (Brazil),VARIG
+3036,Flight,VASP (Brazil),VASP
+3117,Flight,Venezolana International de Aviacion,VIASA
+3057,Flight,Virgin America,VIR AMER
+3144,Flight,Virgin Atlantic,VIR ATL
+3188,Flight,Virgin Express,VIR EXP
+3131,Flight,VLM Airlines,VLM
+3180,Flight,Westjet Airlines,WESTJET
+3299,Flight,Wideroes Flyveselskap,WIDEROES
+3112,Flight,Windward Island,WINDWARD
+3081,Flight,Xiamen Airlines,XIAMENAIR
+3094,Flight,Zambia Airways,ZAMBIA A
+3412,Car,A1 Rent-A-Car,
+3374,Car,Accent Rent-A-Car,
+3354,Car,Action Auto Rental,
+3441,Car,Advantage Rent-A-Car,
+3351,Car,Affiliated Auto Rental,
+3364,Car,Agency Rent-A-Car,
+3361,Car,Airways Rent-A-Car,
+3376,Car,Ajax Rent-A-Car,
+3387,Car,Alamo Rent-A-Car,
+3421,Car,Allstate Rent-A-Car,
+3362,Car,Altra Auto Rental,
+3352,Car,American International,
+3420,Car,ANSA International,
+3400,Car,Auto Host Car Rental,
+3436,Car,Autohansa Rent-A-Car,
+3425,Car,Automate Rent-A-Car,
+3423,Car,Avcar Rent-A-Car,
+3389,Car,Avis Rent-A-Car,
+3427,Car,Avon Rent-A-Car,
+3353,Car,Brooks Rent-A-Car,
+3366,Car,Budget Rent-A-Car,
+3428,Car,Carey Rent-A-Car,
+3390,Car,Dollar Rent-A-Car,
+3398,Car,Econo Car Rent-A-Car,
+3405,Car,Enterprise Rent-A-Car,
+3381,Car,Europcar,
+3391,Car,Europe By Car,
+3409,Car,General Rent-A-Car,
+3357,Car,Hertz,
+3368,Car,Holiday Rent-A-Car,
+3429,Car,Insurance Rent-A-Car,
+3438,Car,Interent Rent-A-Car,
+3394,Car,Kemwell Group Rent-A-Car,
+3430,Car,Major Rent-A-Car,
+3388,Car,Merchants Rent-A-Car,
+3439,Car,Milleville Rent-A-Car,
+3393,Car,National Car Rental,
+3359,Car,Payless Car Rental,
+3370,Car,Rent A Wreck,
+3431,Car,Replacement Rent-A-Car,
+3432,Car,Reserve Rent-A-Car,
+3386,Car,Showcase Rental Cars,
+3355,Car,SIXT Car Rental,
+3360,Car,Snappy Car Rental,
+3395,Car,Thrifty Car Rental,
+3396,Car,Tilden Rent-A-Car,
+3380,Car,Triangle Rent-A-Car,
+3385,Car,Tropical Rent-A-Car,
+3433,Car,Ugly Duckling Rent-A-Car,
+3434,Car,USA Rent-A-Car,
+3435,Car,Value Rent-A-Car,
+3681,Hotel,Adams Mark Hotels,
+3817,Hotel,Affinia,
+3560,Hotel,Aladdin Resort and Casino,
+3788,Hotel,Ala Moana Hotel,
+3619,Hotel,aloft (aloft hotels),
+3754,Hotel,Amelia Island Plantation,
+3517,Hotel,Americana Hotels,
+3617,Hotel,America’s Best Value Inn,
+3614,Hotel,AmericInn,
+3514,Hotel,Amerisuites,
+3536,Hotel,AMFAC Hotels,
+3537,Hotel,ANA Hotels,
+3511,Hotel,Arabella Hotels,
+3670,Hotel,Arcade Hotels,
+3671,Hotel,Arctia Hotels,
+3824,Hotel,Aria (Aria Resort and Casino),
+3594,Hotel,Arizona Biltmore,
+3805,Hotel,The Atlantic,
+3797,Hotel,Atlantic City Hilton,
+3549,Hotel,Auberge des Governeures,
+3826,Hotel,Autograph,
+3728,Hotel,Bally’s Hotel and Casino,
+3556,Hotel,Barton Creek Resort,
+3764,Hotel,Beau Rivage Hotel and Casino,
+3765,Hotel,Bellagio Hotel and Casino,
+3502,Hotel,Best Western Hotels,
+3749,Hotel,Beverly Hills Hotel,
+3743,Hotel,Biltmore Hotel and Suites,
+3620,Hotel,Binion’s Horseshoe Club,
+3733,Hotel,Boca Raton Resort,
+3683,Hotel,Bradbury Suites,
+3547,Hotel,Breakers Resort,
+3727,Hotel,Broadmoor Hotel,
+3684,Hotel,Budget Hosts Inns,
+3685,Hotel,Budgetel Inns,
+3712,Hotel,Buffalo Bill’s Hotel and Casino,
+3771,Hotel,Caesars Hotel and Casino,
+3582,Hotel,California Hotel and Casino,
+3672,Hotel,Campanile Hotels,
+3559,Hotel,Candlewood Suites,
+3833,Hotel,Canopy Hotels,
+3834,Hotel,Baymont Inn and Suites,
+3835,Hotel,Dolce Hotels and Resorts,
+3836,Hotel,Hawthorn Suites by Wyndham,
+3757,Hotel,Canyon Ranch,
+3744,Hotel,Carefree Resorts,
+3821,Hotel,Caribe Royale,
+3787,Hotel,Caribe Royale Resort Suites & Villas,
+3716,Hotel,Carlton Hotels,
+3763,Hotel,Chateau Elan Winery and Resort,
+3544,Hotel,Ciga Hotels,
+3662,Hotel,Circus Circus Hotel and Casino,
+3717,Hotel,City Lodge Hotels,
+3792,Hotel,Claridge Casino Hotel,
+3687,Hotel,Clarion Hotels,
+3677,Hotel,Climat de France Hotels,
+3747,Hotel,Club Corp/Club Resorts,
+3742,Hotel,Club Med,
+3611,Hotel,C MON INN,
+3552,Hotel,Coast Hotel,
+3736,Hotel,Colorado Belle Edgewater Resort,
+3562,Hotel,Comfort Inns,
+3688,Hotel,Compri Hotels,
+3538,Hotel,Concorde Hotels,
+3721,Hotel,Conrad Hotels,
+3689,Hotel,Consort Hotels,
+3828,Hotel,Cosmopolitan of Las Vegas,
+3829,Hotel,Country Inn by Carlson,
+3690,Hotel,Courtyard by Marriott,
+3529,Hotel,CP (Canadian Pacific) Hotels,
+3750,Hotel,Crowne Plaza Hotels,
+3678,Hotel,Cumulus Hotels,
+3593,Hotel,Cunard Hotels,
+3832,Hotel,Curio Hotels,
+3629,Hotel,Dan Hotels,
+3510,Hotel,Days Inns,
+3648,Hotel,De Vera Hotels,
+3581,Hotel,Delta Hotels,
+3691,Hotel,Dillon Inn,
+3804,Hotel,The Diplomat Country Club and Spa,
+3780,Hotel,Disney Resorts,
+3587,Hotel,Doral Hotels,
+3589,Hotel,Doral Golf Resort,
+3623,Hotel,Dorint Hotels,
+3692,Hotel,Doubletree,
+3527,Hotel,Downtowner Passport,
+3693,Hotel,Drury Inn,
+3525,Hotel,Dunfey Hotels,
+3644,Hotel,EconoLodges,
+3694,Hotel,Economy Inns of America,
+3669,Hotel,Eldorado Hotel and Casino,
+3807,Hotel,Element,
+3746,Hotel,Eliot Hotels,
+3652,Hotel,Embassy Hotels,
+3695,Hotel,Embassy Suites,
+3798,Hotel,Embassy Vacation Resort,
+3628,Hotel,Excalibur Hotel and Casino,
+3696,Hotel,Excel Inn,
+3621,Hotel,Extended Stay,
+3627,Hotel,Extended Stay America,
+3697,Hotel,Fairfield Hotels,
+3715,Hotel,Fairfield Inn,
+3784,Hotel,First Hospitality Hotels,
+3590,Hotel,Fairmont Hotels,
+3664,Hotel,Flag Inns,
+3711,Hotel,Flag Inns (Australia),
+3607,Hotel,Fontainebleau Resort,
+3505,Hotel,Forte Hotels,
+3570,Hotel,Forum Hotels,
+3778,Hotel,Four Points Hotels,
+3714,Hotel,Four Seasons (Australia) Hotels,
+3543,Hotel,Four Seasons Hotels,
+3578,Hotel,Frankenmuth Bavarian,
+3766,Hotel,Fremont Hotel and Casino,
+3507,Hotel,Friendship Inns,
+3827,Hotel,Galt House,
+3566,Hotel,Garden Place Hotel,
+3608,Hotel,Gaylord Opryland,
+3609,Hotel,Gaylord Palms,
+3610,Hotel,Gaylord Texan,
+3506,Hotel,Golden Tulip Hotels,
+3571,Hotel,Grand Wailea Resort,
+3753,Hotel,Greenbriar Resorts,
+3561,Hotel,Golden Nugget,
+3794,Hotel,Grand Casino Hotels,
+3823,Hotel,Grand Sierra Resort,
+3618,Hotel,Great Wolf,
+3799,Hotel,Hale Koa Hotel,
+3760,Hotel,Halekulani Hotel/Waikiki Parc,
+3665,Hotel,Hampton Inn Hotels,
+3698,Hotel,Harley Hotels,
+3731,Hotel,Harrahs Hotels and Casinos,
+3734,Hotel,Harvey Bristol Hotels,
+3588,Hotel,Helmsley Hotels,
+3616,Hotel,Hermitage Hotel,
+3604,Hotel,Hilton Garden Inn,
+3504,Hotel,Hilton,
+3535,Hotel,Hilton International,
+3815,Hotel,Holiday Inn Nickelodeon,
+3501,Hotel,Holiday Inns,
+3816,Hotel,Home2 Suites by Hilton,
+3755,Hotel,Homestead,
+3800,Hotel,Homestead Suites,
+3751,Hotel,Homewood Suites,
+3837,Hotel,Hoshino Resorts,
+3595,Hotel,Hospitality Inns,
+3680,Hotel,Hoteis Othan,
+3580,Hotel,Hotel Del Coronado,
+3533,Hotel,Hotel Ibis,
+3813,Hotel,Hotel Indigo,
+3579,Hotel,Hotel Mercure,
+3541,Hotel,Hotel Okura,
+3546,Hotel,Hotel Sierra,
+3625,Hotel,Hotel Universale,
+3663,Hotel,Hoteles El Presidente,
+3548,Hotel,Hotels Melia,
+3638,Hotel,Howard Johnson,
+3602,Hotel,Hudson Hotel,
+3585,Hotel,Hungar Hotels,
+3647,Hotel,Husa Hotels,
+3640,Hotel,Hyatt Hotels,
+3812,Hotel,Hyatt Place,
+3540,Hotel,Iberotel Hotels,
+3673,Hotel,IBUSZ Hotels,
+3651,Hotel,Imperial London Hotels,
+3724,Hotel,Inter Nor Hotels,
+3512,Hotel,Intercontinental Hotels,
+3675,Hotel,Interhotel CEDOK,
+3606,Hotel,Jefferson Hotel,
+3729,Hotel,John Ascuagas Nugget,
+3558,Hotel,Jolly Hotels,
+3563,Hotel,Journey’s End Motels,
+3820,Hotel,Jumeirah Essex House,
+3605,Hotel,Jurys Doyle Hotel Group,
+3758,Hotel,Kahala Mandarin Oriental Hotel,
+3718,Hotel,Karos Hotels,
+3531,Hotel,Kauai Coconut Beach Resort,
+3838,Hotel,Kimpton Hotels,
+3660,Hotel,Knights Inn,
+3839,Hotel,Kyoritsu Hotels,
+3810,Hotel,La Costa Resort,
+3701,Hotel,La Mansion Del Rio,
+3516,Hotel,LaQuinta Inns,
+3576,Hotel,La Quinta Resort,
+3568,Hotel,Ladbroke Hotels,
+3624,Hotel,Lady Luck Hotel and Casino,
+3654,Hotel,Loews Hotels,
+3667,Hotel,Luxor Hotel and Casino,
+3808,Hotel,LXR (Luxury Resorts),
+3767,Hotel,Main Street Hotel and Casino,
+3818,Hotel,MainStay Suites,
+3777,Hotel,Mandalay Bay Resort,
+3577,Hotel,Mandarin Oriental Hotels,
+3557,Hotel,Manhattan East Suite Hotels,
+3668,Hotel,Maritim Hotels,
+3509,Hotel,Marriott,
+3735,Hotel,Masters Economy Inns,
+3520,Hotel,Meridien Hotels,
+3622,Hotel,Merlin Hotel Group,
+3661,Hotel,Metropole Hotels,
+3730,Hotel,MGM Grand Hotel,
+3613,Hotel,Microtel Inn and Suites,
+3699,Hotel,Midway Motor Lodge,
+3741,Hotel,Millennium Hotels,
+3551,Hotel,Mirage Hotel and Casino,
+3572,Hotel,Miyako Hotel,
+3676,Hotel,Monte Carlo Hotel and Casino,
+3700,Hotel,Motel 6,
+3639,Hotel,Mount Charlotte Thistle,
+3612,Hotel,Movenpick Hotels,
+3772,Hotel,Nemacolin Woodlands,
+3776,Hotel,Nevele Grande Resort and Country Club,
+3774,Hotel,"New York, New York Hotel and Casino",
+3603,Hotel,Noah’s Hotel,
+3642,Hotel,Novotel Hotels,
+3657,Hotel,Oberoi Hotels,
+3786,Hotel,Ohana Hotels of Hawaii,
+3592,Hotel,Omni Hotels,
+3732,Hotel,Opryland Hotel,
+3759,Hotel,Orchid at Mauna Lani,
+3658,Hotel,New Otani Hotels,
+3785,Hotel,Outrigger Hotels & Resorts,
+3819,Hotel,Oxford Suites,
+3802,Hotel,The Palace Hotel,
+3599,Hotel,Pannonia Hotels,
+3795,Hotel,Paris Las Vegas Hotel,
+3553,Hotel,Park Inn by Radisson,
+3830,Hotel,Park Plaza Hotel,
+3781,Hotel,Patricia Grand Resort Hotels,
+3752,Hotel,Peabody Hotels,
+3523,Hotel,Peninsula Hotels,
+3653,Hotel,Penta Hotels,
+3796,Hotel,Peppermill Hotel Casino,
+3554,Hotel,Pinehurst Resort,
+3811,Hotel,Premier Inn,
+3761,Hotel,Primadonna Hotel and Casino,
+3526,Hotel,Prince Hotels,
+3584,Hotel,Princess Hotels International,
+3806,Hotel,Princeville Resort,
+3719,Hotel,Protea Hotels,
+3519,Hotel,Pullman International Hotels,
+3508,Hotel,Quality Inns,
+3713,Hotel,Quality Pacific Hotel,
+3645,Hotel,Queens Moat Houses,
+3649,Hotel,Radisson,
+3583,Hotel,Radisson BLU,
+3790,Hotel,Raffles Hotels,
+3637,Hotel,Ramada Inns,
+3633,Hotel,Rank Hotels,
+3674,Hotel,Rantasipi Hotels,
+3528,Hotel,Red Lion Inns,
+3650,Hotel,Red Roof Inns,
+3550,Hotel,Regal 8 Inns,
+3598,Hotel,Regent International Hotel,
+3702,Hotel,Registry Hotels,
+3565,Hotel,Relax Inns,
+3530,Hotel,Renaissance Hotels,
+3703,Hotel,Residence Inn,
+3635,Hotel,Reso Hotel,
+3723,Hotel,Rica Hotels,
+3726,Hotel,Rio Suites,
+3597,Hotel,Riverside Resort and Casino,
+3737,Hotel,Riviera Hotel and Casino,
+3515,Hotel,Rodeway Inns,
+3782,Hotel,Rosen Hotels and Resorts,
+3542,Hotel,Royal Hotels,
+3532,Hotel,Royal Kona Resort,
+3521,Hotel,Royal Lahaina Resort,
+3704,Hotel,Royce Hotels,
+3600,Hotel,Saddlebrook Resort: Tampa,
+3682,Hotel,Sahara Hotel and Casino,
+3564,Hotel,Sam’s Town Hotel and Casino,
+3573,Hotel,Sandman Hotels,
+3705,Hotel,Sandman Inn,
+3775,Hotel,Sands Resort,
+3656,Hotel,Sara Hotels,
+3636,Hotel,Sarova Hotels,
+3655,Hotel,Scandic Hotels,
+3725,Hotel,Sea Pines Resort,
+3809,Hotel,Settle Inn,
+3545,Hotel,Shangri-La International,
+3503,Hotel,Sheraton (Sheraton Hotels),
+3706,Hotel,Shilo Inn,
+3707,Hotel,Shoney’s Inn,
+3679,Hotel,Silver Legacy Hotel and Casino,
+3768,Hotel,Silver Star Hotel and Casino,
+3631,Hotel,Sleep Inns,
+3789,Hotel,Smugglers’ Notch Resort,
+3641,Hotel,Sofitel Hotels,
+3567,Hotel,Soho Grand Hotel,
+3586,Hotel,Sokos Hotel,
+3518,Hotel,Sol Hotels,
+3591,Hotel,Sonesta Hotels,
+3534,Hotel,Southern Pacific Hotel,
+3720,Hotel,Southern Sun Hotels,
+3770,Hotel,SpringHill Suites,
+3745,Hotel,St. Regis Hotel,
+3666,Hotel,Stakis Hotels,
+3791,Hotel,Staybridge Suites,
+3643,Hotel,Steigenberger Hotels,
+3769,Hotel,Stratosphere Hotel and Casino,
+3626,Hotel,Studio Plus,
+3539,Hotel,Summerfield Suites Hotel,
+3686,Hotel,Susse Chalet,
+3709,Hotel,Super 8 Motels,
+3646,Hotel,Swallow Hotels,
+3634,Hotel,Swissotel,
+3659,Hotel,Taj Hotels International,
+3793,Hotel,The Flamingo Hotels,
+3632,Hotel,The Phoenician,
+3710,Hotel,The Ritz-Carlton,
+3814,Hotel,The Roosevelt Hotel NY,
+3783,Hotel,Town and Country Resort and Convention Center,
+3522,Hotel,Tokyo Hotel,
+3630,Hotel,Tokyu Hotels,
+3756,Hotel,Toyoko Inn,
+3740,Hotel,TownePlace Suites,
+3601,Hotel,TradeWinds Resorts,
+3615,Hotel,Travelodge,
+3555,Hotel,Treasure Island Hotel and Casino,
+3569,Hotel,Tribeca Grand Hotel,
+3738,Hotel,Tropicana Resort and Casino,
+3575,Hotel,Vagabond Hotels,
+3825,Hotel,Vdara (Vdara Hotel and Spa),
+3773,Hotel,Venetian Resort Hotel and Casino,
+3574,Hotel,Venture Inn,
+3708,Hotel,Virgin River Hotel and Casino,
+3779,Hotel,W Hotels,
+3831,Hotel,Waldorf,
+3524,Hotel,WelcomGroup Hotels,
+3748,Hotel,Wellesley Inns,
+3513,Hotel,Westin (Westin Hotels),
+3762,Hotel,Whiskey Pete’s Hotel and Casino,
+3803,Hotel,The Wigwam Golf Resort and Spa,
+3801,Hotel,Wilderness Hotel and Golf Resort,
+3739,Hotel,Woodside Hotels and Resorts,
+3722,Hotel,Wyndham,
+3596,Hotel,Wynn Las Vegas,
