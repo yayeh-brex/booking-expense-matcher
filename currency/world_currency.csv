@@ -1,0 +1,70 @@
+Country,Currency Name,Symbol,Acronym
+United States,US Dollar,$,USD
+Canada,Canadian Dollar,$,CAD
+European Union,Euro,€,EUR
+United Kingdom,Pound Sterling,£,GBP
+Japan,Japanese Yen,¥,JPY
+Switzerland,Swiss Franc,CHF,CHF
+Australia,Australian Dollar,$,AUD
+New Zealand,New Zealand Dollar,$,NZD
+China,Chinese Yuan,¥,CNY
+India,Indian Rupee,₹,INR
+Mexico,Mexican Peso,$,MXN
+Brazil,Brazilian Real,R$,BRL
+South Africa,South African Rand,R,ZAR
+Russia,Russian Ruble,₽,RUB
+South Korea,South Korean Won,₩,KRW
+Saudi Arabia,Saudi Riyal,﷼,SAR
+Singapore,Singapore Dollar,$,SGD
+Hong Kong,Hong Kong Dollar,$,HKD
+Turkey,Turkish Lira,₺,TRY
+Sweden,Swedish Krona,kr,SEK
+Norway,Norwegian Krone,kr,NOK
+Denmark,Danish Krone,kr,DKK
+Thailand,Thai Baht,฿,THB
+Indonesia,Indonesian Rupiah,Rp,IDR
+Philippines,Philippine Peso,₱,PHP
+Vietnam,Vietnamese Dong,₫,VND
+Israel,Israeli Shekel,₪,ILS
+United Arab Emirates,UAE Dirham,د.إ,AED
+Qatar,Qatari Riyal,﷼,QAR
+Kuwait,Kuwaiti Dinar,د.ك,KWD
+Egypt,Egyptian Pound,£,EGP
+Nigeria,Nigerian Naira,₦,NGN
+Kenya,Kenyan Shilling,Sh,KES
+Ghana,Ghanaian Cedi,₵,GHS
+Pakistan,Pakistani Rupee,₨,PKR
+Bangladesh,Bangladeshi Taka,৳,BDT
+Argentina,Argentine Peso,$,ARS
+Chile,Chilean Peso,$,CLP
+Colombia,Colombian Peso,$,COP
+Peru,Peruvian Sol,S/.,PEN
+Malaysia,Malaysian Ringgit,RM,MYR
+Poland,Polish Zloty,zł,PLN
+Czech Republic,Czech Koruna,Kč,CZK
+Hungary,Hungarian Forint,Ft,HUF
+Romania,Romanian Leu,lei,RON
+Iceland,Icelandic Krona,kr,ISK
+Croatia,Croatian Kuna,kn,HRK
+Bulgaria,Bulgarian Lev,лв,BGN
+Serbia,Serbian Dinar,дин,RSD
+Ukraine,Ukrainian Hryvnia,₴,UAH
+Morocco,Moroccan Dirham,د.م.,MAD
+Tunisia,Tunisian Dinar,د.ت,TND
+Jordan,Jordanian Dinar,د.ا,JOD
+Lebanon,Lebanese Pound,ل.ل,LBP
+Oman,Omani Rial,﷼,OMR
+Bahrain,Bahraini Dinar,.د.ب,BHD
+Qatar,Qatari Riyal,﷼,QAR
+Iraq,Iraqi Dinar,ع.د,IQD
+Iran,Iranian Rial,﷼,IRR
+Nepal,Nepalese Rupee,₨,NPR
+Sri Lanka,Sri Lankan Rupee,Rs,LKR
+Myanmar,Myanmar Kyat,K,MMK
+Cambodia,Cambodian Riel,៛,KHR
+Laos,Lao Kip,₭,LAK
+Mongolia,Mongolian Tugrik,₮,MNT
+Fiji,Fijian Dollar,$,FJD
+Papua New Guinea,Kina,K,PGK
+Solomon Islands,Solomon Islands Dollar,$,SBD
+Vanuatu,Vatu,Vt,VUV
