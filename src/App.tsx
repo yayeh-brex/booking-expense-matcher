@@ -10,11 +10,14 @@ import { parseExpenseData } from './services/ExpenseParserService';
 import { getCurrencyMappings } from './services/CurrencyService';
 import { normalizeCurrency, extractCurrencyFromAmount } from './services/CurrencyNormalizer';
 import {
-  matchBookingsWithExpenses,
   getMatchStatistics,
   getUnmatchedBookings,
   getUnmatchedExpenses
 } from './services/MatchingService';
+import {
+  startMatchingProcess,
+  MatchingProgress
+} from './services/OptimizedMatchingService';
 import FlightMatchSummary from './components/FlightMatchSummary';
 import BookingTypeSummary from './components/BookingTypeSummary';
 import TestTypeSummary from './components/TestTypeSummary';
@@ -71,6 +74,7 @@ function App() {
   // Matching states
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
   const [isMatching, setIsMatching] = useState<boolean>(false);
+  const [matchingProgress, setMatchingProgress] = useState<number>(0);
 
   // State to track if matching should be run after parsing
   const [runMatchingAfterParse, setRunMatchingAfterParse] = useState<boolean>(false);
@@ -528,6 +532,7 @@ function App() {
   const handleRunMatching = useCallback(() => {
     if (parsedBookings && parsedExpenses) {
       setIsMatching(true);
+      setMatchingProgress(0);
       setError(null);
 
       try {
@@ -540,8 +545,8 @@ function App() {
         );
         console.log(`DEBUG: Found ${flightBookings.length} flight bookings with Mastercard`);
 
-        // Log details of each flight booking
-        flightBookings.forEach((booking, index) => {
+        // Log details of a few flight bookings (limit to 5 to reduce console spam)
+        flightBookings.slice(0, 5).forEach((booking, index) => {
           console.log(`DEBUG: Flight booking ${index+1}:`, {
             id: booking.id,
             type: booking.bookingTypeNormalized,
@@ -553,84 +558,42 @@ function App() {
           });
         });
 
-        // Run the matching algorithm
-        const matches = matchBookingsWithExpenses(parsedBookings, parsedExpenses);
+        // Run the matching algorithm with batch processing
+        startMatchingProcess(
+          parsedBookings,
+          parsedExpenses,
+          (progress) => {
+            // Update progress in UI
+            const percentComplete = Math.floor((progress.processedExpenses / progress.totalExpenses) * 100);
+            setMatchingProgress(percentComplete);
 
-        // Debug: Log how many matches were found
-        console.log(`DEBUG: Total matches found: ${matches.length}`);
+            // When complete, update the final results
+            if (progress.isComplete) {
+              console.log(`DEBUG: Total matches found: ${progress.matches.length}`);
 
-        // Debug: Check specifically for flight matches
-        const debugFlightMatches = matches.filter(match => {
-          const booking = getBookingById(match.bookingId);
-          return booking && (
-            booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-            booking.travelType?.toLowerCase().includes('flight') ||
-            booking.travelType?.toLowerCase().includes('air')
-          );
-        });
-        console.log(`DEBUG: Flight matches found: ${debugFlightMatches.length}`);
+              // Debug: Check specifically for flight matches
+              const debugFlightMatches = progress.matches.filter(match => {
+                const booking = getBookingById(match.bookingId);
+                return booking && (
+                  booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+                  booking.travelType?.toLowerCase().includes('flight') ||
+                  booking.travelType?.toLowerCase().includes('air')
+                );
+              });
+              console.log(`DEBUG: Flight matches found: ${debugFlightMatches.length}`);
 
-        // If there are flight matches, log them for debugging
-        if (debugFlightMatches.length > 0) {
-          console.log('DEBUG: Flight matches details:');
-          debugFlightMatches.forEach((match, index) => {
-            const booking = getBookingById(match.bookingId);
-            const expense = getExpenseById(match.expenseId);
-            console.log(`Match ${index+1}:`, {
-              bookingId: match.bookingId,
-              expenseId: match.expenseId,
-              confidence: match.matchConfidence,
-              bookingType: booking?.bookingTypeNormalized,
-              reasons: match.matchReason
-            });
-          });
-        }
-
-        // Log detailed match information before setting results
-        console.log(`DEBUG: [App] Found ${matches.length} total matches, checking for flight matches`);
-
-        // Specifically check for flight matches (naming it to avoid duplicate declaration)
-        const appFlightMatches = matches.filter(match => {
-          const booking = getBookingById(match.bookingId);
-          return booking && (
-            booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-            booking.travelType?.toLowerCase().includes('flight') ||
-            booking.travelType?.toLowerCase().includes('air')
-          );
-        });
-        console.log(`DEBUG: [App] Flight matches found: ${appFlightMatches.length}`);
-
-        // Log details of each flight match
-        if (appFlightMatches.length > 0) {
-          console.log('DEBUG: [App] Flight match details:');
-          appFlightMatches.forEach((match, index) => {
-            const booking = getBookingById(match.bookingId);
-            console.log(`DEBUG: [App] Flight match ${index+1}: Booking ID=${match.bookingId}, type=${booking?.bookingTypeNormalized}, confidence=${match.matchConfidence}`);
-          });
-        } else {
-          console.log('DEBUG: [App] No flight matches were found.');
-
-          // Debug why flight matches weren't found - check if there are any flight bookings that didn't get matched
-          const flightBookings = parsedBookings.filter(b =>
-            b.bookingTypeNormalized === 'Flight' &&
-            b.cardTypeNormalized?.toLowerCase() === 'mastercard'
-          );
-
-          if (flightBookings.length > 0) {
-            console.log(`DEBUG: [App] Found ${flightBookings.length} flight bookings but no matches`);
-          } else {
-            console.log(`DEBUG: [App] No flight bookings were found, that's why there are no flight matches`);
+              // Set final results and complete
+              setMatchResults(progress.matches);
+              setIsMatching(false);
+            }
           }
-        }
-
-        setMatchResults(matches);
+        );
       } catch (err) {
         setError(`Error during matching: ${err instanceof Error ? err.message : String(err)}`);
-      } finally {
         setIsMatching(false);
       }
     }
-  }, [parsedBookings, parsedExpenses, getBookingById, getExpenseById]);
+  }, [parsedBookings, parsedExpenses, getBookingById]);
 
   // Add useEffect to run matching after parsing completes if flag is set
   useEffect(() => {
@@ -738,8 +701,25 @@ function App() {
               disabled={Boolean(isMatching) || !parsedBookings || parsedBookings.length === 0 || matchResults !== null}
               className="px-4 me-2 mb-2"
             >
-              {isMatching ? 'Matching...' : 'Match Expenses'}
+              {isMatching ? `Matching... ${matchingProgress}%` : 'Match Expenses'}
             </Button>
+
+            {isMatching && (
+              <div className="w-100 mt-2">
+                <div className="progress">
+                  <div
+                    className="progress-bar progress-bar-striped progress-bar-animated"
+                    role="progressbar"
+                    style={{ width: `${matchingProgress}%` }}
+                    aria-valuenow={matchingProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    {matchingProgress}%
+                  </div>
+                </div>
+              </div>
+            )}
 
             <Button
               variant="warning"
@@ -751,7 +731,7 @@ function App() {
               disabled={isParsingLoading || isMatching || !bookingFile || !expenseFile || !selectedTMC}
               className="px-4 mb-2"
             >
-              Parse & Match
+              {isMatching ? `Matching... ${matchingProgress}%` : (isParsingLoading ? 'Parsing...' : 'Parse & Match')}
             </Button>
           </div>
         </Col>
