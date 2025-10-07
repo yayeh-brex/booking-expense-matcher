@@ -1377,7 +1377,7 @@ function App() {
                         for (const fieldName of possibleCardHolderFields) {
                           for (const key of Object.keys(rawData)) {
                             // Case-insensitive field name search
-                            if (key.toLowerCase().replace(/[_\\s-]/g, '') === fieldName.toLowerCase().replace(/[_\\s-]/g, '')) {
+                            if (key.toLowerCase().replace(/[_\s-]/g, '') === fieldName.toLowerCase().replace(/[_\s-]/g, '')) {
                               const fieldValue = String(rawData[key] || '').trim();
                               if (fieldValue) {
                                 cardHolderName = fieldValue;
@@ -1406,11 +1406,36 @@ function App() {
                         }
                       }
 
+                      // Helper function to validate card holder names (less strict than full name validation)
+                      function isValidCardHolderName(name: string): boolean {
+                        if (!name) return false;
+
+                        // Basic validation - must have at least one alphabetic character
+                        if (!/[a-zA-Z]/.test(name)) return false;
+
+                        // Reject obvious non-names
+                        const nonNameKeywords = [
+                          'unknown', 'undefined', 'null', 'none', 'na', 'n/a',
+                          'test', 'example', 'error', 'missing', 'empty'
+                        ];
+
+                        const lowerName = name.toLowerCase();
+                        if (nonNameKeywords.some(keyword =>
+                            lowerName === keyword ||
+                            lowerName.startsWith(`${keyword} `) ||
+                            lowerName.endsWith(` ${keyword}`))) {
+                          return false;
+                        }
+
+                        // Passed all validations
+                        return true;
+                      }
+
                       // Normalize the card holder name if found
                       if (cardHolderName) {
                         // Use the same person name normalization function used for traveler names
                         const normalizedCardHolder = normalizePersonName(cardHolderName);
-                        if (normalizedCardHolder && isValidFullName(normalizedCardHolder)) {
+                        if (normalizedCardHolder && isValidCardHolderName(normalizedCardHolder)) {
                           booking.cardHolderNameNormalized = normalizedCardHolder;
                           console.log(`Normalized card holder name: "${normalizedCardHolder}"`);
                         } else {

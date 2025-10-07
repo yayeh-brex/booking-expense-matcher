@@ -173,8 +173,8 @@ function normalizeString(str: string): string {
   return str
     .toLowerCase()
     .trim()
-    .replace(/[^\\w\\s]/g, '')
-    .replace(/\\s+/g, ' ');
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, ' ');
 }
 
 function fuzzyNameMatch(name1: string, name2: string): number {
@@ -188,8 +188,8 @@ function fuzzyNameMatch(name1: string, name2: string): number {
   if (norm1.includes(norm2) || norm2.includes(norm1)) return 0.9;
 
   // Split names into parts and check for matches
-  const parts1 = norm1.split(/\\s+/);
-  const parts2 = norm2.split(/\\s+/);
+  const parts1 = norm1.split(/\s+/);
+  const parts2 = norm2.split(/\s+/);
 
   let matchingParts = 0;
   const totalParts = Math.max(parts1.length, parts2.length);
@@ -238,15 +238,16 @@ function fuzzyStringMatch(str1: string, str2: string): number {
   if (norm1.includes(norm2) || norm2.includes(norm1)) return 0.9;
 
   // Simple overlap score to avoid expensive Levenshtein calculation
-  const words1 = new Set(norm1.split(/\\s+/));
-  const words2 = new Set(norm2.split(/\\s+/));
+  const words1 = new Set(norm1.split(/\s+/));
+  const words2 = new Set(norm2.split(/\s+/));
 
   let overlap = 0;
-  for (const word of words1) {
+  // Convert Set to Array before iteration to avoid TypeScript compilation error
+  Array.from(words1).forEach(word => {
     if (words2.has(word)) {
       overlap++;
     }
-  }
+  });
 
   const totalWords = words1.size + words2.size - overlap;
   return totalWords > 0 ? overlap / totalWords : 0;
