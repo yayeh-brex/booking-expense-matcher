@@ -25,7 +25,8 @@ import FinalBookingSummary from './components/FinalBookingSummary';
 import DirectBookingSummary from './components/DirectBookingSummary';
 import TestReportValues from './components/TestReportValues';
 import DataInspector from './components/DataInspector';
-import DataFixer from './components/DataFixer';
+// Import the service instead of the component
+import { applyDataFixes } from './services/DataFixerService';
 
 // List of Travel Management Companies (TMCs)
 const TMC_LIST = [
@@ -201,7 +202,14 @@ function App() {
           setBookingData(parsedData);
 
           // Parse the data using the selected TMC parser
-          const bookings = parseBookingData(parsedData, selectedTMC);
+          let bookings = parseBookingData(parsedData, selectedTMC);
+
+          // Automatically apply data fixes to correct the card type and booking type values
+          console.log(`DEBUG: [App] Automatically applying data fixes to ${bookings.length} bookings`);
+          const { fixedBookings, stats } = applyDataFixes(bookings);
+          bookings = fixedBookings;
+          console.log(`DEBUG: [App] Data fixes applied: ${stats.masterCardFixed} card types fixed, ${stats.typeFixed} booking types fixed`);
+          console.log(`DEBUG: [App] After fixes: ${stats.totalMastercard} Mastercard bookings, Flight: ${stats.flightCount}, Hotel: ${stats.hotelCount}, Car: ${stats.carCount}, Rail: ${stats.railCount}`);
 
           // Explicitly set bookingTypeNormalized for flights based on travel type or type field
           // This is to fix the issue with flight matching
@@ -777,8 +785,7 @@ function App() {
               <p>Number of bookings: {parsedBookings.length}</p>
 
               {/* Completely direct calculation - no tricks */}
-              {/* Data Fixer component to fix the data issues */}
-              <DataFixer bookings={parsedBookings} onFixedData={setParsedBookings} />
+              {/* Data fixes are now applied automatically after parsing */}
 
               <DirectBookingSummary allBookings={parsedBookings} />
 
