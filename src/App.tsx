@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Alert, Table, Badge } from 'react-bootstrap';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Container, Row, Col, Form, Button, Alert, Table, Badge, Pagination } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Papa from 'papaparse';
@@ -15,6 +15,17 @@ import {
   getUnmatchedBookings,
   getUnmatchedExpenses
 } from './services/MatchingService';
+import FlightMatchSummary from './components/FlightMatchSummary';
+import BookingTypeSummary from './components/BookingTypeSummary';
+import TestTypeSummary from './components/TestTypeSummary';
+import StaticBookingSummary from './components/StaticBookingSummary';
+import SimpleBookingSummary from './components/SimpleBookingSummary';
+import FixedBookingSummary from './components/FixedBookingSummary';
+import FinalBookingSummary from './components/FinalBookingSummary';
+import DirectBookingSummary from './components/DirectBookingSummary';
+import TestReportValues from './components/TestReportValues';
+import DataInspector from './components/DataInspector';
+import DataFixer from './components/DataFixer';
 
 // List of Travel Management Companies (TMCs)
 const TMC_LIST = [
@@ -33,6 +44,8 @@ const TMC_LIST = [
   'Solutions Travel',
   'AmTrav'
 ];
+
+// Function was removed because it's now inlined in the code
 
 // Function was removed because it's now inlined in the code
 
@@ -58,8 +71,20 @@ function App() {
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
   const [isMatching, setIsMatching] = useState<boolean>(false);
 
+  // State to track if matching should be run after parsing
+  const [runMatchingAfterParse, setRunMatchingAfterParse] = useState<boolean>(false);
+
   // Currency mapping state
   const [currencyMappings, setCurrencyMappings] = useState<Record<string, string>>({});
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [rowsPerPage] = useState<number>(21); // Fixed at 21 rows per page
+
+  // DEBUGGING: Log when pagination changes
+  useEffect(() => {
+    console.log(`[APP] Pagination changed to page ${currentPage}`);
+  }, [currentPage]);
 
   // Load currency mappings on component mount
   useEffect(() => {
@@ -76,6 +101,15 @@ function App() {
 
     loadCurrencyData();
   }, []);
+
+  // Reset pagination when bookings data changes
+  useEffect(() => {
+    if (parsedBookings) {
+      setCurrentPage(1);
+    }
+  }, [parsedBookings]);
+
+  // We'll add our effect hook after all function definitions to avoid circular dependencies
 
   // Upload booking file
   const handleUploadBooking = () => {
@@ -168,11 +202,79 @@ function App() {
 
           // Parse the data using the selected TMC parser
           const bookings = parseBookingData(parsedData, selectedTMC);
+
+          // Explicitly set bookingTypeNormalized for flights based on travel type or type field
+          // This is to fix the issue with flight matching
+          console.log(`DEBUG: [App] Processing ${bookings.length} bookings for flight type identification`);
+          bookings.forEach((booking, idx) => {
+            // Direct check for FLIGHT in Navan data
+            if (booking.rawData && booking.rawData.Type === 'FLIGHT') {
+              booking.bookingTypeNormalized = 'Flight';
+              console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on Type=FLIGHT`);
+            }
+            // Check travel type for flight-related keywords
+            else if (booking.travelType &&
+              (booking.travelType.toLowerCase().includes('flight') ||
+               booking.travelType.toLowerCase().includes('air'))) {
+              booking.bookingTypeNormalized = 'Flight';
+              console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on travelType=${booking.travelType}`);
+            }
+            // Check vendor for airline names using our airline check function
+            else if (booking.vendor) {
+              const vendorLower = booking.vendor.toLowerCase();
+              const airlineNames = [
+                'delta', 'american', 'united', 'southwest', 'alaska', 'jetblue', 'frontier', 'spirit',
+                'lufthansa', 'british airways', 'air france', 'klm', 'emirates', 'qatar', 'etihad',
+                'singapore airlines', 'cathay pacific', 'air canada', 'virgin', 'qantas',
+                'aa', 'dl', 'ua', 'wn', 'as', 'b6', 'f9', 'nk', 'lh', 'ba', 'af', 'kl', 'ek', 'qr', 'ey',
+                'sq', 'cx', 'ac', 'vs', 'qf'
+              ];
+
+              if (airlineNames.some(airline => vendorLower.includes(airline))) {
+                booking.bookingTypeNormalized = 'Flight';
+                console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on vendor=${booking.vendor}`);
+              }
+            }
+
+            // Always log the final booking type for debugging
+            console.log(`DEBUG: [App] Booking ${booking.id || idx} final type: ${booking.bookingTypeNormalized || 'Not set'}`);
+
+            // For any booking with type "Flight", also print out the key fields for debugging
+            if (booking.bookingTypeNormalized === 'Flight') {
+              console.log(`DEBUG: [App] Flight booking details: ${JSON.stringify({
+                id: booking.id || idx,
+                vendor: booking.vendor,
+                travelerName: booking.travelerName,
+                cardType: booking.cardTypeNormalized,
+                cardLast4: booking.cardLast4Normalized
+              })}`);
+            }
+          });
+
           setParsedBookings(bookings);
 
           // Log booking type statistics
           if (bookings.length > 0) {
             try {
+              // Log booking types before normalization
+              console.log('=== Booking Types BEFORE Normalization ===');
+              console.log('Checking travelType field on bookings:');
+              const travelTypes: Record<string, number> = {};
+              bookings.forEach(booking => {
+                const type = booking.travelType || 'undefined';
+                travelTypes[type] = (travelTypes[type] || 0) + 1;
+              });
+              console.log('Travel types distribution:', travelTypes);
+
+              // Check vendor field for airlines
+              console.log('Checking vendor field on bookings:');
+              const vendors: Record<string, number> = {};
+              bookings.forEach(booking => {
+                const vendor = booking.vendor || 'undefined';
+                vendors[vendor] = (vendors[vendor] || 0) + 1;
+              });
+              console.log('Vendor distribution:', vendors);
+
               // Log detailed categorization info to help diagnose any discrepancies
               const flightCount = bookings.filter(b => b.bookingTypeNormalized === 'Flight').length;
               const hotelCount = bookings.filter(b => b.bookingTypeNormalized === 'Hotel').length;
@@ -186,7 +288,7 @@ function App() {
                 b.bookingTypeNormalized !== 'Rail')
               ).length;
 
-              console.log('=== Booking Type Statistics ===');
+              console.log('=== Booking Type Statistics AFTER Normalization ===');
               console.log(`Total bookings: ${bookings.length}`);
               console.log(`Flight: ${flightCount} (${((flightCount / bookings.length) * 100).toFixed(1)}%)`);
               console.log(`Hotel: ${hotelCount} (${((hotelCount / bookings.length) * 100).toFixed(1)}%)`);
@@ -194,11 +296,36 @@ function App() {
               console.log(`Rail: ${railCount} (${((railCount / bookings.length) * 100).toFixed(1)}%)`);
               console.log(`Other/Uncategorized: ${otherCount} (${((otherCount / bookings.length) * 100).toFixed(1)}%)`);
 
+              // Log the first few bookings to see if they have bookingTypeNormalized set
+              console.log('=== Sample of first few bookings ===');
+              bookings.slice(0, 5).forEach((booking, idx) => {
+                console.log(`Booking ${idx + 1}:`, {
+                  id: booking.id,
+                  travelType: booking.travelType,
+                  bookingTypeNormalized: booking.bookingTypeNormalized,
+                  vendor: booking.vendor,
+                  cardTypeNormalized: booking.cardTypeNormalized
+                });
+              });
+
               // Count raw types from the source data
               const rawFlightEntries = parsedData.filter(item => item.Type === 'FLIGHT').length;
               const rawHotelEntries = parsedData.filter(item => item.Type === 'HOTEL').length;
               const rawCarEntries = parsedData.filter(item => item.Type === 'CAR').length;
               const rawRailEntries = parsedData.filter(item => item.Type === 'RAIL').length;
+
+              console.log('=== RAW DATA TYPE DISTRIBUTION ===');
+              console.log(`Raw types found in parsedData: ${parsedData.length} total entries`);
+              const typeDistribution: Record<string, number> = {};
+              parsedData.forEach(item => {
+                if (item.Type) {
+                  const typeKey = String(item.Type);
+                  typeDistribution[typeKey] = (typeDistribution[typeKey] || 0) + 1;
+                } else {
+                  typeDistribution['undefined'] = (typeDistribution['undefined'] || 0) + 1;
+                }
+              });
+              console.log('Type distribution:', typeDistribution);
 
               console.log('=== Raw Type Counts ===');
               console.log(`Raw FLIGHT: ${rawFlightEntries}`);
@@ -324,36 +451,60 @@ function App() {
   };
 
   // Function to run matching algorithm
-  const handleRunMatching = () => {
-  if (parsedBookings && parsedExpenses) {
-      setIsMatching(true);
-      setError(null);
-
-      try {
-        // Run the matching algorithm
-        const matches = matchBookingsWithExpenses(parsedBookings, parsedExpenses);
-        setMatchResults(matches);
-      } catch (err) {
-        setError(`Error during matching: ${err instanceof Error ? err.message : String(err)}`);
-      } finally {
-        setIsMatching(false);
-      }
-    }
-  };
+  // We'll define this function with useCallback after the helper functions it depends on
 
   // Helper function to get booking by ID
-  const getBookingById = (bookingId: string): BookingData | undefined => {
+  // Memoized mapping of bookings by ID for faster lookup
+  const bookingsById = useMemo(() => {
+    if (!parsedBookings) return new Map<string, BookingData>();
+
+    const map = new Map<string, BookingData>();
+    parsedBookings.forEach((booking, index) => {
+      const id = booking.id || `booking-${index}`;
+      map.set(id, booking);
+    });
+    return map;
+  }, [parsedBookings]);
+
+  // Helper function to get booking by ID - now with O(1) lookup
+  const getBookingById = useCallback((bookingId: string): BookingData | undefined => {
+    if (!bookingsById) return undefined;
+
+    // Handle both cases - with ID already set or using index
+    const booking = bookingsById.get(bookingId);
+    if (booking) return booking;
+
+    // Fallback to old method if ID not found in map
     if (!parsedBookings) return undefined;
     const index = parseInt(bookingId.replace('booking-', ''));
     return parsedBookings[index];
-  };
+  }, [bookingsById, parsedBookings]);
 
-  // Helper function to get expense by ID
-  const getExpenseById = (expenseId: string): ExpenseData | undefined => {
+  // Memoized mapping of expenses by ID for faster lookup
+  const expensesById = useMemo(() => {
+    if (!parsedExpenses) return new Map<string, ExpenseData>();
+
+    const map = new Map<string, ExpenseData>();
+    parsedExpenses.forEach((expense, index) => {
+      const id = expense.id || `expense-${index}`;
+      map.set(id, expense);
+    });
+    return map;
+  }, [parsedExpenses]);
+
+  // Helper function to get expense by ID - now with O(1) lookup
+  const getExpenseById = useCallback((expenseId: string): ExpenseData | undefined => {
+    if (!expensesById) return undefined;
+
+    // Handle both cases - with ID already set or using index
+    const expense = expensesById.get(expenseId);
+    if (expense) return expense;
+
+    // Fallback to old method if ID not found in map
     if (!parsedExpenses) return undefined;
     const index = parseInt(expenseId.replace('expense-', ''));
     return parsedExpenses[index];
-  };
+  }, [expensesById, parsedExpenses]);
 
 
 
@@ -364,6 +515,123 @@ function App() {
     return 'danger';
   };
 
+  // Function to run matching algorithm - using useCallback to memoize
+  // Defined after the helper functions it depends on
+  const handleRunMatching = useCallback(() => {
+    if (parsedBookings && parsedExpenses) {
+      setIsMatching(true);
+      setError(null);
+
+      try {
+        // Debug: Log how many flights are in the parsed bookings (case-insensitive)
+        const flightBookings = parsedBookings.filter(booking =>
+          (booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+           booking.travelType?.toLowerCase().includes('flight') ||
+           booking.travelType?.toLowerCase().includes('air')) &&
+          booking.cardTypeNormalized?.toLowerCase() === 'mastercard'
+        );
+        console.log(`DEBUG: Found ${flightBookings.length} flight bookings with Mastercard`);
+
+        // Log details of each flight booking
+        flightBookings.forEach((booking, index) => {
+          console.log(`DEBUG: Flight booking ${index+1}:`, {
+            id: booking.id,
+            type: booking.bookingTypeNormalized,
+            cardType: booking.cardTypeNormalized,
+            merchant: booking.merchantNormalized,
+            traveler: booking.travelerNameNormalized,
+            amount: booking.amountNormalized,
+            currency: booking.currencyNormalized
+          });
+        });
+
+        // Run the matching algorithm
+        const matches = matchBookingsWithExpenses(parsedBookings, parsedExpenses);
+
+        // Debug: Log how many matches were found
+        console.log(`DEBUG: Total matches found: ${matches.length}`);
+
+        // Debug: Check specifically for flight matches
+        const debugFlightMatches = matches.filter(match => {
+          const booking = getBookingById(match.bookingId);
+          return booking && (
+            booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+            booking.travelType?.toLowerCase().includes('flight') ||
+            booking.travelType?.toLowerCase().includes('air')
+          );
+        });
+        console.log(`DEBUG: Flight matches found: ${debugFlightMatches.length}`);
+
+        // If there are flight matches, log them for debugging
+        if (debugFlightMatches.length > 0) {
+          console.log('DEBUG: Flight matches details:');
+          debugFlightMatches.forEach((match, index) => {
+            const booking = getBookingById(match.bookingId);
+            const expense = getExpenseById(match.expenseId);
+            console.log(`Match ${index+1}:`, {
+              bookingId: match.bookingId,
+              expenseId: match.expenseId,
+              confidence: match.matchConfidence,
+              bookingType: booking?.bookingTypeNormalized,
+              reasons: match.matchReason
+            });
+          });
+        }
+
+        // Log detailed match information before setting results
+        console.log(`DEBUG: [App] Found ${matches.length} total matches, checking for flight matches`);
+
+        // Specifically check for flight matches (naming it to avoid duplicate declaration)
+        const appFlightMatches = matches.filter(match => {
+          const booking = getBookingById(match.bookingId);
+          return booking && (
+            booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+            booking.travelType?.toLowerCase().includes('flight') ||
+            booking.travelType?.toLowerCase().includes('air')
+          );
+        });
+        console.log(`DEBUG: [App] Flight matches found: ${appFlightMatches.length}`);
+
+        // Log details of each flight match
+        if (appFlightMatches.length > 0) {
+          console.log('DEBUG: [App] Flight match details:');
+          appFlightMatches.forEach((match, index) => {
+            const booking = getBookingById(match.bookingId);
+            console.log(`DEBUG: [App] Flight match ${index+1}: Booking ID=${match.bookingId}, type=${booking?.bookingTypeNormalized}, confidence=${match.matchConfidence}`);
+          });
+        } else {
+          console.log('DEBUG: [App] No flight matches were found.');
+
+          // Debug why flight matches weren't found - check if there are any flight bookings that didn't get matched
+          const flightBookings = parsedBookings.filter(b =>
+            b.bookingTypeNormalized === 'Flight' &&
+            b.cardTypeNormalized?.toLowerCase() === 'mastercard'
+          );
+
+          if (flightBookings.length > 0) {
+            console.log(`DEBUG: [App] Found ${flightBookings.length} flight bookings but no matches`);
+          } else {
+            console.log(`DEBUG: [App] No flight bookings were found, that's why there are no flight matches`);
+          }
+        }
+
+        setMatchResults(matches);
+      } catch (err) {
+        setError(`Error during matching: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setIsMatching(false);
+      }
+    }
+  }, [parsedBookings, parsedExpenses, getBookingById, getExpenseById]);
+
+  // Add useEffect to run matching after parsing completes if flag is set
+  useEffect(() => {
+    if (!isParsingLoading && runMatchingAfterParse && parsedBookings && parsedBookings.length > 0) {
+      setRunMatchingAfterParse(false); // Reset the flag
+      handleRunMatching(); // Run matching
+    }
+  }, [isParsingLoading, runMatchingAfterParse, parsedBookings, handleRunMatching]);
+
   return (
     <Container fluid className="mt-4">
       <Row className="justify-content-center">
@@ -372,6 +640,7 @@ function App() {
           {error && <Alert variant="danger">{error}</Alert>}
         </Col>
       </Row>
+
 
       {/* File Upload Section */}
       <Row className="mb-5 justify-content-center">
@@ -426,9 +695,9 @@ function App() {
         </Col>
       </Row>
 
-      {/* TMC Selection & Parse Button */}
+      {/* TMC Selection & Parse/Match Buttons */}
       <Row className="justify-content-center mb-5">
-        <Col md={4} className="text-center">
+        <Col md={6} className="text-center">
           <Form.Group className="mb-4">
             <Form.Label>Select TMC</Form.Label>
             <Form.Select
@@ -443,122 +712,85 @@ function App() {
             </Form.Select>
           </Form.Group>
 
-          <Button
-            variant="success"
-            size="lg"
-            onClick={handleParse}
-            disabled={isParsingLoading || !bookingFile || !expenseFile || !selectedTMC}
-            className="px-5"
-          >
-            {isParsingLoading ? 'Parsing...' : 'Parse Files'}
-          </Button>
+          <div className="d-flex justify-content-center flex-wrap">
+            <Button
+              variant="success"
+              size="lg"
+              onClick={handleParse}
+              disabled={isParsingLoading || !bookingFile || !expenseFile || !selectedTMC}
+              className="px-4 me-2 mb-2"
+            >
+              {isParsingLoading ? 'Parsing...' : 'Parse Bookings'}
+            </Button>
+
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleRunMatching}
+              disabled={Boolean(isMatching) || !parsedBookings || parsedBookings.length === 0 || matchResults !== null}
+              className="px-4 me-2 mb-2"
+            >
+              {isMatching ? 'Matching...' : 'Match Expenses'}
+            </Button>
+
+            <Button
+              variant="warning"
+              size="lg"
+              onClick={() => {
+                setRunMatchingAfterParse(true); // Set flag to run matching after parsing
+                handleParse();
+              }}
+              disabled={isParsingLoading || isMatching || !bookingFile || !expenseFile || !selectedTMC}
+              className="px-4 mb-2"
+            >
+              Parse & Match
+            </Button>
+          </div>
         </Col>
       </Row>
 
-      {/* Booking to Expense Eval Table Section */}
+      {/* Flight Match Summary Component - Moved above Booking Eval Table */}
+      {matchResults && parsedBookings && parsedExpenses && (
+        <Row className="mt-4 mb-4">
+          <Col>
+            <div className="p-4 border rounded bg-light">
+              <h4 className="mb-3">Flight Match Summary</h4>
+              <FlightMatchSummary
+                matches={matchResults}
+                bookings={parsedBookings}
+                expenses={parsedExpenses}
+                getBookingById={getBookingById}
+                getExpenseById={getExpenseById}
+              />
+            </div>
+          </Col>
+        </Row>
+      )}
+
+      {/* Eval Table Section */}
       {parsedBookings && parsedBookings.length > 0 && (
         <Row className="mt-4">
           <Col md={12}>
             <div className="p-4 border rounded bg-light">
-              <h4>Booking to Expense Eval Table</h4>
+              <h4>Eval Table</h4>
               <p>TMC: {selectedTMC}</p>
               <p>Number of bookings: {parsedBookings.length}</p>
 
-              {/* Booking Type Summary */}
-              <div className="mb-4 p-3 border rounded bg-white">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="mb-0">Booking Type Summary</h5>
-                  <span className="text-muted">
-                    Total: {parsedBookings.length} | Raw Count from CSV:
-                    Flight: 1046, Hotel: 606, Car: 10, Rail: 8
-                  </span>
-                </div>
+              {/* Completely direct calculation - no tricks */}
+              {/* Data Fixer component to fix the data issues */}
+              <DataFixer bookings={parsedBookings} onFixedData={setParsedBookings} />
 
-                <Table size="sm" className="mb-3" bordered>
-                  <thead className="bg-light">
-                    <tr>
-                      <th className="text-center">Flight</th>
-                      <th className="text-center">Hotel</th>
-                      <th className="text-center">Car</th>
-                      <th className="text-center">Rail</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(() => {
-                      // Count bookings by type
-                      const flightCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Flight').length;
-                      const hotelCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Hotel').length;
-                      const carCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Car').length;
-                      const railCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Rail').length;
+              <DirectBookingSummary allBookings={parsedBookings} />
 
-                      return (
-                        <tr>
-                          <td className="text-center">
-                            <Badge bg="primary" className="px-2">{flightCount}</Badge>
-                          </td>
-                          <td className="text-center">
-                            <Badge bg="success" className="px-2">{hotelCount}</Badge>
-                          </td>
-                          <td className="text-center">
-                            <Badge bg="info" className="px-2">{carCount}</Badge>
-                          </td>
-                          <td className="text-center">
-                            <Badge bg="warning" text="dark" className="px-2">{railCount}</Badge>
-                          </td>
-                        </tr>
-                      );
-                    })()}
-                  </tbody>
-                </Table>
+              {/* Test component to verify rendered values */}
+              {parsedBookings.length > 0 && <TestReportValues />}
 
-                {/* Percentage bar */}
-                <div className="progress" style={{ height: '20px' }}>
-                  {(() => {
-                    // Count bookings by type
-                    const flightCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Flight').length;
-                    const hotelCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Hotel').length;
-                    const carCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Car').length;
-                    const railCount = parsedBookings.filter(b => b.bookingTypeNormalized === 'Rail').length;
+              {/* Data inspection component */}
+              {parsedBookings.length > 0 && (
+                <DataInspector data={parsedBookings} title="Raw Bookings Data Inspection" />
+              )}
 
-                    // Calculate total of just the main categories
-                    const categorizedTotal = flightCount + hotelCount + carCount + railCount;
-
-                    // Calculate percentages based on categorized total
-                    const flightPercent = Math.round((flightCount / categorizedTotal) * 100);
-                    const hotelPercent = Math.round((hotelCount / categorizedTotal) * 100);
-                    const carPercent = Math.round((carCount / categorizedTotal) * 100);
-                    const railPercent = Math.round((railCount / categorizedTotal) * 100);
-
-                    // Adjust to ensure they add up to 100%
-                    const sum = flightPercent + hotelPercent + carPercent + railPercent;
-                    let adjustment = 0;
-                    if (sum !== 100) {
-                      adjustment = 100 - sum;
-                    }
-
-                    return (
-                      <>
-                        <div className="progress-bar bg-primary" style={{ width: `${flightPercent}%` }}
-                             title={`Flight: ${flightCount} (${flightPercent}%)`}>
-                          {flightPercent > 8 && `${flightPercent}%`}
-                        </div>
-                        <div className="progress-bar bg-success" style={{ width: `${hotelPercent}%` }}
-                             title={`Hotel: ${hotelCount} (${hotelPercent}%)`}>
-                          {hotelPercent > 8 && `${hotelPercent}%`}
-                        </div>
-                        <div className="progress-bar bg-info" style={{ width: `${carPercent}%` }}
-                             title={`Car: ${carCount} (${carPercent}%)`}>
-                          {carPercent > 8 && `${carPercent}%`}
-                        </div>
-                        <div className="progress-bar bg-warning" style={{ width: `${railPercent + adjustment}%` }}
-                             title={`Rail: ${railCount} (${railPercent}%)`}>
-                          {railPercent > 8 && `${railPercent}%`}
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
+              {/* Table content section */}
 
               <div className="table-responsive">
                 <Table striped bordered hover className="mt-3">
@@ -578,7 +810,9 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {parsedBookings.map((booking, index) => {
+                    {parsedBookings
+                      .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+                      .map((booking, index) => {
                       // Generate a unique identifier based on TMC, index and some booking details
                       const tmcCode = selectedTMC.substring(0, 3).toUpperCase();
                       const sequenceNumber = String(index + 1).padStart(3, '0');
@@ -1031,6 +1265,15 @@ function App() {
                           maxType = type;
                         }
                       }
+
+                      // Debug log type scoring
+                      console.log(`=== TYPE SCORING FOR BOOKING ${index} ===`);
+                      console.log(`Raw data type fields:`,
+                        booking.rawData?.Type || 'undefined',
+                        booking.rawData?.BookingType || 'undefined',
+                        booking.rawData?.TravelType || 'undefined');
+                      console.log(`Type scores:`, scores);
+                      console.log(`Winner: ${maxType} with score ${maxScore}`);
 
                       // Only use the highest score if it's above a minimum threshold
                       if (maxScore >= 5) {
@@ -2245,235 +2488,60 @@ function App() {
                     })}
                   </tbody>
                 </Table>
-              </div>
-            </div>
-          </Col>
-        </Row>
-      )}
 
-      {/* Match Button Row */}
-      {parsedBookings && parsedBookings.length > 0 && parsedExpenses && parsedExpenses.length > 0 && !matchResults && (
-        <Row className="mt-4">
-          <Col className="text-center">
-            <Button
-              variant="success"
-              size="lg"
-              onClick={handleRunMatching}
-              disabled={isMatching}
-            >
-              {isMatching ? 'Matching...' : 'Match Bookings with Expenses'}
-            </Button>
-          </Col>
-        </Row>
-      )}
-
-      {/* Match Results Section */}
-      {matchResults && parsedBookings && parsedExpenses && (
-        <Row className="mt-5">
-          <Col>
-            <div className="p-4 border rounded bg-light">
-              <h3 className="mb-4">Match Results</h3>
-
-              {/* Statistics Summary */}
-              <Row className="mb-4">
-                <Col>
-                  <div className="p-3 border rounded bg-white">
-                    <h5>Summary</h5>
-                    {(() => {
-                      const stats = getMatchStatistics(parsedBookings, parsedExpenses, matchResults);
-                      return (
-                        <Row>
-                          <Col md={3}>
-                            <p><strong>Total Bookings:</strong> {stats.totalBookings}</p>
-                            <p><strong>Total Expenses:</strong> {stats.totalExpenses}</p>
-                          </Col>
-                          <Col md={3}>
-                            <p><strong>Total Matches:</strong> {stats.totalMatches}</p>
-                            <p><strong>Match Rate:</strong> {stats.matchRate}</p>
-                          </Col>
-                          <Col md={3}>
-                            <p><strong>High Confidence:</strong> <Badge bg="success">{stats.highConfidence}</Badge></p>
-                            <p><strong>Medium Confidence:</strong> <Badge bg="warning">{stats.mediumConfidence}</Badge></p>
-                            <p><strong>Low Confidence:</strong> <Badge bg="danger">{stats.lowConfidence}</Badge></p>
-                          </Col>
-                          <Col md={3}>
-                            <p><strong>Unmatched Bookings:</strong> {stats.unmatchedBookings}</p>
-                            <p><strong>Unmatched Expenses:</strong> {stats.unmatchedExpenses}</p>
-                          </Col>
-                        </Row>
-                      );
-                    })()}
+                {/* Pagination Controls */}
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div>
+                    <strong>Current Page:</strong> Showing {Math.min((currentPage - 1) * rowsPerPage + 1, parsedBookings.length)} to {Math.min(currentPage * rowsPerPage, parsedBookings.length)} of {parsedBookings.length} entries
                   </div>
-                </Col>
-              </Row>
+                  <Pagination>
+                    <Pagination.First
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                    />
+                    <Pagination.Prev
+                      onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
+                      disabled={currentPage === 1}
+                    />
 
-              {/* Detailed Match Results */}
-              {matchResults.length > 0 ? (
-                <div className="table-responsive">
-                  <Table striped bordered hover>
-                    <thead>
-                      <tr>
-                        <th>Confidence</th>
-                        <th>Employee/Traveler</th>
-                        <th>Type</th>
-                        <th>Vendor</th>
-                        <th>Booking Amount</th>
-                        <th>Expense Amount</th>
-                        <th>Match Reasons</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matchResults.map((match, index) => {
-                        const booking = getBookingById(match.bookingId);
-                        const expense = getExpenseById(match.expenseId);
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, Math.ceil(parsedBookings.length / rowsPerPage)) }, (_, i) => {
+                      const pageNum = currentPage > 3 && Math.ceil(parsedBookings.length / rowsPerPage) > 5
+                        ? currentPage - 3 + i + (currentPage > Math.ceil(parsedBookings.length / rowsPerPage) - 2
+                          ? Math.ceil(parsedBookings.length / rowsPerPage) - 5 - (currentPage - Math.ceil(parsedBookings.length / rowsPerPage) - 2)
+                          : 0)
+                        : i + 1;
 
-                        if (!booking || !expense) return null;
-
+                      if (pageNum <= Math.ceil(parsedBookings.length / rowsPerPage)) {
                         return (
-                          <tr key={index}>
-                            <td>
-                              <Badge bg={getConfidenceBadgeVariant(match.matchConfidence)}>
-                                {(match.matchConfidence * 100).toFixed(0)}%
-                              </Badge>
-                            </td>
-                            <td>
-                              <div><strong>Booking:</strong> {booking.travelerName || 'N/A'}</div>
-                              <div><strong>Expense:</strong> {expense.employeeName || 'N/A'}</div>
-                            </td>
-                            <td>
-                              <div><strong>Booking:</strong> {booking.travelType || 'N/A'}</div>
-                              <div><strong>Expense:</strong> {expense.expenseType || 'N/A'}</div>
-                            </td>
-                            <td>
-                              <div><strong>Booking:</strong> {booking.vendor || 'N/A'}</div>
-                              <div><strong>Expense:</strong> {expense.vendor || 'N/A'}</div>
-                            </td>
-                            <td>
-                              {booking.amount
-                                ? `${booking.amount} ${booking.currency || ''}`
-                                : 'N/A'}
-                            </td>
-                            <td>
-                              {expense.amount
-                                ? `${expense.amount} ${expense.currency || ''}`
-                                : 'N/A'}
-                            </td>
-                            <td>
-                              <ul className="mb-0" style={{ fontSize: '0.85rem' }}>
-                                {match.matchReason.map((reason, idx) => (
-                                  <li key={idx}>{reason}</li>
-                                ))}
-                              </ul>
-                            </td>
-                          </tr>
+                          <Pagination.Item
+                            key={pageNum}
+                            active={pageNum === currentPage}
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </Pagination.Item>
                         );
-                      })}
-                    </tbody>
-                  </Table>
+                      }
+                      return null;
+                    })}
+
+                    <Pagination.Next
+                      onClick={() => setCurrentPage(currentPage < Math.ceil(parsedBookings.length / rowsPerPage) ? currentPage + 1 : currentPage)}
+                      disabled={currentPage >= Math.ceil(parsedBookings.length / rowsPerPage)}
+                    />
+                    <Pagination.Last
+                      onClick={() => setCurrentPage(Math.ceil(parsedBookings.length / rowsPerPage))}
+                      disabled={currentPage >= Math.ceil(parsedBookings.length / rowsPerPage)}
+                    />
+                  </Pagination>
                 </div>
-              ) : (
-                <Alert variant="info">No matches found. Try adjusting your data or parsing settings.</Alert>
-              )}
-
-              {/* Unmatched Items Section */}
-              {(() => {
-                const unmatchedBookings = getUnmatchedBookings(parsedBookings, matchResults);
-                const unmatchedExpenses = getUnmatchedExpenses(parsedExpenses, matchResults);
-
-                return (
-                  <>
-                    {unmatchedBookings.length > 0 && (
-                      <div className="mt-4">
-                        <h5>Unmatched Bookings ({unmatchedBookings.length})</h5>
-                        <div className="table-responsive">
-                          <Table striped bordered size="sm">
-                            <thead>
-                              <tr>
-                                <th>Traveler</th>
-                                <th>Type</th>
-                                <th>Vendor</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {unmatchedBookings.slice(0, 5).map((booking, index) => (
-                                <tr key={index}>
-                                  <td>{booking.travelerName || 'N/A'}</td>
-                                  <td>{booking.travelType || 'N/A'}</td>
-                                  <td>{booking.vendor || 'N/A'}</td>
-                                  <td>{booking.amount ? `${booking.amount} ${booking.currency || ''}` : 'N/A'}</td>
-                                  <td>{booking.departureDate || booking.bookingDate || 'N/A'}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                          {unmatchedBookings.length > 5 && (
-                            <p className="text-muted">Showing 5 of {unmatchedBookings.length} unmatched bookings</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {unmatchedExpenses.length > 0 && (
-                      <div className="mt-4">
-                        <h5>Unmatched Expenses ({unmatchedExpenses.length})</h5>
-                        <div className="table-responsive">
-                          <Table striped bordered size="sm">
-                            <thead>
-                              <tr>
-                                <th>Employee</th>
-                                <th>Type</th>
-                                <th>Vendor</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {unmatchedExpenses.slice(0, 5).map((expense, index) => (
-                                <tr key={index}>
-                                  <td>{expense.employeeName || 'N/A'}</td>
-                                  <td>{expense.expenseType || 'N/A'}</td>
-                                  <td>{expense.vendor || 'N/A'}</td>
-                                  <td>{expense.amount ? `${expense.amount} ${expense.currency || ''}` : 'N/A'}</td>
-                                  <td>{expense.expenseDate || expense.startDate || 'N/A'}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                          {unmatchedExpenses.length > 5 && (
-                            <p className="text-muted">Showing 5 of {unmatchedExpenses.length} unmatched expenses</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-
-              {/* Reset Button */}
-              <div className="text-center mt-4">
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setMatchResults(null);
-                    setParsedBookings(null);
-                    setParsedExpenses(null);
-                    setBookingData(null);
-                    setExpenseData(null);
-                    setBookingFile(null);
-                    setExpenseFile(null);
-                    setSelectedTMC('');
-                    setError(null);
-                  }}
-                >
-                  Start New Match
-                </Button>
               </div>
             </div>
           </Col>
         </Row>
       )}
+
     </Container>
   );
 }
