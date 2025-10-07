@@ -737,12 +737,16 @@ function App() {
         </Col>
       </Row>
 
-      {/* Flights Eval Component - Moved above Booking Eval Table */}
+      {/* Flights Eval Component - Flight Bookings with Match Information */}
       {matchResults && parsedBookings && parsedExpenses && (
         <Row className="mt-4 mb-4">
           <Col>
             <div className="p-4 border rounded bg-light">
-              <h4 className="mb-3">Flights Eval</h4>
+              <h4 className="mb-3">Flights Eval Table</h4>
+              <p className="text-muted">
+                This table shows all flight bookings with matching confidence and expense data when available.
+                Bookings without matches show "Unmatched" in the confidence column.
+              </p>
               <FlightsEval
                 matches={matchResults}
                 bookings={parsedBookings}
