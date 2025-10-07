@@ -1360,8 +1360,9 @@ function App() {
 
                       if (booking.rawData) {
                         const rawData = booking.rawData;
-                        // Common field names for credit card holder information
+                        // Common field names for credit card holder information - expanded list
                         const possibleCardHolderFields = [
+                          // Direct card holder fields
                           'card_holder', 'cardHolder', 'cardholder',
                           'card_owner', 'cardOwner',
                           'card_name', 'cardName', 'name_on_card', 'nameOnCard',
@@ -1370,14 +1371,27 @@ function App() {
                           'billing_name', 'billingName',
                           'payer_name', 'payerName',
                           'account_holder', 'accountHolder',
-                          'paid_by', 'paidBy'
+                          'paid_by', 'paidBy',
+
+                          // Added more field variations
+                          'card holder', 'card holder name', 'credit card holder',
+                          'credit card name', 'credit card holder name',
+                          'payment method name', 'payment account name',
+                          'billing contact', 'billing contact name',
+                          'payer', 'paid by name', 'payment by',
+                          'name on payment', 'payment person',
+                          'payment card holder', 'paid with name',
+                          'account name', 'credit account name'
                         ];
 
                         // Check for specific card holder name fields
                         for (const fieldName of possibleCardHolderFields) {
                           for (const key of Object.keys(rawData)) {
-                            // Case-insensitive field name search
-                            if (key.toLowerCase().replace(/[_\s-]/g, '') === fieldName.toLowerCase().replace(/[_\s-]/g, '')) {
+                            // Case-insensitive field name search with more flexible matching
+                            const keyClean = key.toLowerCase().replace(/[_\s-]/g, '');
+                            const fieldClean = fieldName.toLowerCase().replace(/[_\s-]/g, '');
+
+                            if (keyClean === fieldClean || keyClean.includes(fieldClean)) {
                               const fieldValue = String(rawData[key] || '').trim();
                               if (fieldValue) {
                                 cardHolderName = fieldValue;
@@ -1395,12 +1409,33 @@ function App() {
                             const keyLower = key.toLowerCase();
                             if ((keyLower.includes('card') && (keyLower.includes('name') || keyLower.includes('holder'))) ||
                                 (keyLower.includes('payment') && keyLower.includes('name')) ||
-                                (keyLower.includes('billing') && keyLower.includes('name'))) {
+                                (keyLower.includes('billing') && keyLower.includes('name')) ||
+                                (keyLower.includes('payer') || keyLower.includes('paid by')) ||
+                                (keyLower.includes('credit') && keyLower.includes('name'))) {
                               if (value && typeof value === 'string' && value.trim()) {
                                 cardHolderName = value.trim();
                                 console.log(`Found card holder name in combined field: ${key} = ${cardHolderName}`);
                                 break;
                               }
+                            }
+                          }
+                        }
+
+                        // Fallback: If card holder name is still not found, try using traveler name
+                        // This is a reasonable fallback for many bookings where the traveler is also the cardholder
+                        if (!cardHolderName && booking.travelerName) {
+                          cardHolderName = booking.travelerName;
+                          console.log(`Using traveler name as fallback for card holder name: ${cardHolderName}`);
+                        }
+
+                        // Another fallback: Check specific employee/buyer fields that might contain card holder
+                        if (!cardHolderName) {
+                          const employeeFields = ['Employee', 'EmployeeName', 'Employee Name', 'Buyer', 'Buyer Name', 'Purchaser'];
+                          for (const field of employeeFields) {
+                            if (rawData[field]) {
+                              cardHolderName = String(rawData[field]);
+                              console.log(`Using employee/buyer field as card holder name: ${field} = ${cardHolderName}`);
+                              break;
                             }
                           }
                         }
@@ -2103,8 +2138,6 @@ function App() {
                             'trip-user',   // with hyphen
                             'UserTravel'   // reversed order
                           ];
-
-                          const testName = "John Smith"; // A valid name for testing
                           testFieldNames.forEach(fieldName => {
                             // Calculate score based on field name
                             let fieldScore = 0;

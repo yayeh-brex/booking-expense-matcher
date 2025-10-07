@@ -355,7 +355,9 @@ export class FlightMatcher {
     }
 
     // 7. Card holder name matching (high weight)
-    if (booking.cardHolderNameNormalized && booking.cardHolderNameNormalized !== '[No card holder name found]' &&
+    if (booking.cardHolderNameNormalized &&
+        booking.cardHolderNameNormalized !== '[No card holder name found]' &&
+        booking.cardHolderNameNormalized !== '[Invalid card holder name format]' &&
         expense.employeeName) {
       maxPossibleScore += 15;
       const cardHolderMatch = this.fuzzyStringMatch(booking.cardHolderNameNormalized, expense.employeeName);
