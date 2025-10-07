@@ -118,7 +118,7 @@ const TestReportValues = () => {
           <li>Rail: {expected.rail}</li>
         </ul>
         <p className="text-muted small">
-          Check browser console (F12 > Console) for detailed test results
+          Check browser console (F12 {'>>'} Console) for detailed test results
         </p>
       </div>
     </div>

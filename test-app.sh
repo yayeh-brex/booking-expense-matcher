@@ -66,7 +66,7 @@ fi
 echo -e "\n${BLUE}Stage 3: Checking for required components${NC}"
 required_files=(
     "src/App.tsx"
-    "src/components/FlightMatchSummary.tsx"
+    "src/components/FlightsEval.tsx"
     "src/services/MatchingService.ts"
     "src/services/matchers/FlightMatcher.ts"
 )

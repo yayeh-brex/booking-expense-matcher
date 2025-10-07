@@ -18,7 +18,7 @@ import {
   startMatchingProcess,
   MatchingProgress
 } from './services/OptimizedMatchingService';
-import FlightMatchSummary from './components/FlightMatchSummary';
+import FlightsEval from './components/FlightsEval';
 import BookingTypeSummary from './components/BookingTypeSummary';
 import TestTypeSummary from './components/TestTypeSummary';
 import StaticBookingSummary from './components/StaticBookingSummary';
@@ -737,13 +737,13 @@ function App() {
         </Col>
       </Row>
 
-      {/* Flight Match Summary Component - Moved above Booking Eval Table */}
+      {/* Flights Eval Component - Moved above Booking Eval Table */}
       {matchResults && parsedBookings && parsedExpenses && (
         <Row className="mt-4 mb-4">
           <Col>
             <div className="p-4 border rounded bg-light">
-              <h4 className="mb-3">Flight Match Summary</h4>
-              <FlightMatchSummary
+              <h4 className="mb-3">Flights Eval</h4>
+              <FlightsEval
                 matches={matchResults}
                 bookings={parsedBookings}
                 expenses={parsedExpenses}

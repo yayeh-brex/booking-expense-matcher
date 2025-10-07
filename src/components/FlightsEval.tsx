@@ -3,10 +3,10 @@ import { Card, Row, Col, Table, Badge, ListGroup } from 'react-bootstrap';
 import { MatchResult } from '../types/ExpenseData';
 import { BookingData } from '../types/BookingData';
 import { ExpenseData } from '../types/ExpenseData';
-import styles from './FlightMatchSummary.module.css';
+import styles from './FlightsEval.module.css';
 
-// Props interface for the FlightMatchSummary component
-interface FlightMatchSummaryProps {
+// Props interface for the FlightsEval component
+interface FlightsEvalProps {
   matches: MatchResult[];
   bookings: BookingData[];
   expenses: ExpenseData[];
@@ -14,7 +14,7 @@ interface FlightMatchSummaryProps {
   getExpenseById: (id: string) => ExpenseData | undefined;
 }
 
-const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
+const FlightsEval: React.FC<FlightsEvalProps> = ({
   matches,
   bookings,
   expenses,
@@ -22,7 +22,7 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
   getExpenseById
 }) => {
   // Filter only flight matches
-  console.log(`DEBUG: [FlightMatchSummary] Filtering flight matches from ${matches.length} total matches`);
+  console.log(`DEBUG: [FlightsEval] Filtering flight matches from ${matches.length} total matches`);
   const flightMatches = matches.filter(match => {
     const booking = getBookingById(match.bookingId);
     // Use expanded criteria to identify flight bookings
@@ -46,16 +46,16 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
     );
 
     if (booking) {
-      console.log(`DEBUG: [FlightMatchSummary] Booking ${match.bookingId}: type=${booking.bookingTypeNormalized}, isFlightBooking=${isFlightBooking}`);
+      console.log(`DEBUG: [FlightsEval] Booking ${match.bookingId}: type=${booking.bookingTypeNormalized}, isFlightBooking=${isFlightBooking}`);
       if (isFlightBooking) {
         console.log(`  - Flight match identified: merchant=${booking.merchantNormalized}, traveler=${booking.travelerNameNormalized}`);
       }
     } else {
-      console.log(`DEBUG: [FlightMatchSummary] Could not find booking with ID ${match.bookingId}`);
+      console.log(`DEBUG: [FlightsEval] Could not find booking with ID ${match.bookingId}`);
     }
     return isFlightBooking;
   });
-  console.log(`DEBUG: [FlightMatchSummary] Found ${flightMatches.length} flight matches`);
+  console.log(`DEBUG: [FlightsEval] Found ${flightMatches.length} flight matches`);
 
   // Calculate statistics for flight matches - using expanded flight detection logic
   const totalFlightBookings = bookings.filter(booking => (
@@ -96,7 +96,7 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
   // Check if there are any flight matches
   if (flightMatches.length === 0) {
     // Log additional debug information before showing the no matches message
-    console.log(`DEBUG: [FlightMatchSummary] No flight matches found in ${matches.length} total matches`);
+    console.log(`DEBUG: [FlightsEval] No flight matches found in ${matches.length} total matches`);
 
     // Count how many total flight bookings we have using expanded flight detection logic
     const totalFlightBookings = bookings.filter(booking => (
@@ -117,7 +117,7 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
       // Check origin/destination (flights typically have both)
       (booking.origin && booking.destination)
     )).length;
-    console.log(`DEBUG: [FlightMatchSummary] Total flight bookings: ${totalFlightBookings}`);
+    console.log(`DEBUG: [FlightsEval] Total flight bookings: ${totalFlightBookings}`);
 
     // Get details about the flight bookings using expanded flight detection logic
     const flightBookingsDetails = bookings
@@ -149,13 +149,13 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
       }));
 
     if (flightBookingsDetails.length > 0) {
-      console.log(`DEBUG: [FlightMatchSummary] First few flight bookings: ${JSON.stringify(flightBookingsDetails, null, 2)}`);
+      console.log(`DEBUG: [FlightsEval] First few flight bookings: ${JSON.stringify(flightBookingsDetails, null, 2)}`);
     }
 
     return (
       <Card className={`mt-4 ${styles.flightMatchCard}`}>
         <Card.Header className={styles.flightHeader}>
-          <h5 className="mb-0">Flight Match Summary</h5>
+          <h5 className="mb-0">Flights Eval</h5>
         </Card.Header>
         <Card.Body>
           <p>No flight matches found.</p>
@@ -171,7 +171,7 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
   return (
     <Card className={`mt-4 ${styles.flightMatchCard}`}>
       <Card.Header className={styles.flightHeader}>
-        <h5 className="mb-0">Flight Match Summary</h5>
+        <h5 className="mb-0">Flights Eval</h5>
       </Card.Header>
       <Card.Body>
         {/* Flight Match Statistics */}
@@ -404,4 +404,4 @@ const FlightMatchSummary: React.FC<FlightMatchSummaryProps> = ({
   );
 };
 
-export default FlightMatchSummary;
+export default FlightsEval;
