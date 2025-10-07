@@ -1,0 +1,87 @@
+.flightMatchCard {
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.flightHeader {
+  background-color: #0d6efd;
+  color: white;
+  padding: 0.75rem 1rem;
+}
+
+.statCard {
+  height: 100%;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.statLabel {
+  color: #6c757d;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.bestMatchCard {
+  border-left: 3px solid #0d6efd;
+  height: 100%;
+}
+
+.confidenceBadge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.fieldLabel {
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-bottom: 0.1rem;
+}
+
+.fieldValue {
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.flightRoute {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.flightRoute svg {
+  margin: 0 0.5rem;
+}
+
+.matchTable {
+  font-size: 0.9rem;
+}
+
+.matchTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.factorsList {
+  border: none;
+  font-size: 0.9rem;
+}
+
+.factorsList li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+
+.factorCount {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+}

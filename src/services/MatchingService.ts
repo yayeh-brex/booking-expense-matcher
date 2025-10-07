@@ -1,8 +1,10 @@
 import { BookingData } from '../types/BookingData';
 import { ExpenseData, MatchResult } from '../types/ExpenseData';
+import { FlightMatcher, MatchScore } from './matchers/FlightMatcher';
 
 /**
  * Main matching service to compare bookings with expenses
+ * Now with support for specialized matchers for different booking types
  */
 export function matchBookingsWithExpenses(
   bookings: BookingData[],
@@ -10,19 +12,104 @@ export function matchBookingsWithExpenses(
 ): MatchResult[] {
   const matches: MatchResult[] = [];
 
+  // Filter bookings to include both Mastercard and other recognized card types
+  const filteredBookings = bookings.filter(booking => {
+    // First try exact Mastercard match (preferred)
+    if (booking.cardTypeNormalized?.toLowerCase() === 'mastercard') {
+      return true;
+    }
+
+    // As a fallback, if card type is available but not Mastercard, still include it
+    // This makes the matcher more inclusive in case of card type normalization issues
+    if (booking.cardTypeNormalized &&
+        booking.cardTypeNormalized !== '[No card type found]' &&
+        booking.cardLast4Normalized &&
+        booking.cardLast4Normalized !== '[No card last 4 found]') {
+      return true;
+    }
+
+    return false;
+  });
+
+  console.log(`DEBUG: [MatchingService] Starting with ${bookings.length} bookings`);
+  console.log(`DEBUG: [MatchingService] After Mastercard filter: ${filteredBookings.length} bookings`);
+
+  // Log flight bookings count - using case-insensitive check
+  const flightBookings = filteredBookings.filter(b =>
+    b.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+    b.travelType?.toLowerCase().includes('flight') ||
+    b.travelType?.toLowerCase().includes('air')
+  );
+  console.log(`DEBUG: [MatchingService] Flight bookings: ${flightBookings.length}`);
+  console.log(`DEBUG: [MatchingService] All booking types found: ${JSON.stringify(filteredBookings.map(b => b.bookingTypeNormalized))}`);
+
+  // Log more details about bookings to diagnose issues
+  console.log(`DEBUG: [MatchingService] Total expenses to match: ${expenses.length}`);
+  console.log(`DEBUG: [MatchingService] MINIMUM_CONFIDENCE threshold: 0.3`);
+
+  // Log first few flight bookings
+  if (flightBookings.length > 0) {
+    console.log('DEBUG: [MatchingService] Sample flight bookings:');
+    flightBookings.slice(0, 3).forEach((booking, idx) => {
+      console.log(`Flight booking ${idx + 1}:`, {
+        id: booking.id,
+        type: booking.bookingTypeNormalized,
+        travelType: booking.travelType,
+        vendor: booking.vendor,
+        amount: booking.amountNormalized
+      });
+    });
+  }
+
+  // Initialize specialized matchers
+  const flightMatcher = new FlightMatcher();
+
   // For each expense, find potential booking matches
   expenses.forEach((expense, expenseIdx) => {
     const expenseId = expense.id || `expense-${expenseIdx}`;
 
     // Score each booking against this expense
-    const scoredBookings = bookings.map((booking, bookingIdx) => {
+    const scoredBookings = filteredBookings.map((booking, bookingIdx) => {
       const bookingId = booking.id || `booking-${bookingIdx}`;
-      const { score, reasons } = calculateMatchScore(booking, expense);
+
+      // Use specialized matchers based on booking type
+      let matchScore: MatchScore;
+
+      // Case-insensitive check for flight bookings with expanded criteria
+      // Check booking type, travel type, merchant, vendor, or any flight-related keywords
+      const isFlightBooking = (
+        // Check normalized type
+        booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+        // Check travel type for flight keywords
+        booking.travelType?.toLowerCase()?.includes('flight') ||
+        booking.travelType?.toLowerCase()?.includes('air') ||
+        // Check merchant/vendor for airline names
+        booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
+        booking.vendor?.toLowerCase()?.includes('airline') ||
+        booking.vendor?.toLowerCase()?.includes('airways') ||
+        // Check for common airline names
+        booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('united') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('american') ||
+        // Check origin/destination (flights typically have both)
+        (booking.origin && booking.destination)
+      );
+
+      console.log(`DEBUG: [MatchingService] Booking ${booking.id} isFlightBooking: ${isFlightBooking}`);
+
+      if (isFlightBooking) {
+        // Use flight-specific matcher
+        matchScore = flightMatcher.calculateFlightMatchScore(booking, expense);
+      } else {
+        // Use generic matcher for other booking types
+        matchScore = calculateMatchScore(booking, expense);
+      }
 
       return {
         bookingId,
-        score,
-        reasons
+        score: matchScore.score,
+        reasons: matchScore.reasons
       };
     });
 
@@ -31,8 +118,9 @@ export function matchBookingsWithExpenses(
 
     // Get the best match if it meets minimum threshold
     const bestMatch = scoredBookings[0];
-    const MINIMUM_CONFIDENCE = 0.3; // 30% minimum confidence
+    const MINIMUM_CONFIDENCE = 0.15; // Lowering from 20% to 15% to increase chance of finding matches
 
+    console.log(`DEBUG: [MatchingService] Best match for expense ${expenseId}: score=${bestMatch?.score || 'none'}`);
     if (bestMatch && bestMatch.score >= MINIMUM_CONFIDENCE) {
       matches.push({
         expenseId,
@@ -49,11 +137,12 @@ export function matchBookingsWithExpenses(
 /**
  * Calculate match score between a booking and an expense
  * Returns a score between 0 and 1, and list of matching reasons
+ * Generic matcher for non-flight bookings
  */
 function calculateMatchScore(
   booking: BookingData,
   expense: ExpenseData
-): { score: number; reasons: string[] } {
+): MatchScore {
   let totalScore = 0;
   let maxPossibleScore = 0;
   const reasons: string[] = [];
@@ -87,7 +176,7 @@ function calculateMatchScore(
     }
   }
 
-  // 4. Credit card last 4 digits matching (high weight)
+  // 4. Credit card last 4 digits matching (highest weight - most important match criterion)
   // Extract last 4 digits from expense description or other fields
   const expenseCardLast4 = expense.cardLast4Normalized;
   const bookingCardLast4 = booking.cardLast4Normalized;
@@ -95,9 +184,9 @@ function calculateMatchScore(
   if (bookingCardLast4 && expenseCardLast4 &&
       bookingCardLast4 !== '[No card last 4 found]' &&
       expenseCardLast4 !== '[No card last 4 found]') {
-    maxPossibleScore += 20; // Higher weight as this is a strong indicator
+    maxPossibleScore += 30; // Highest weight as this is the most important indicator
     if (bookingCardLast4 === expenseCardLast4) {
-      totalScore += 20;
+      totalScore += 30;
       reasons.push(`Card last 4 match: ${bookingCardLast4}`);
     }
   }
@@ -319,6 +408,8 @@ function fuzzyStringMatch(str1: string, str2: string): number {
  * Normalize string for comparison
  */
 function normalizeString(str: string): string {
+  if (!str) return '';
+
   return str
     .toLowerCase()
     .trim()
@@ -384,10 +475,6 @@ function levenshteinDistance(str1: string, str2: string): number {
 
   return matrix[len1][len2];
 }
-
-// The extractCardLast4FromBooking and extractCardLast4FromExpense functions have been removed
-// as they are no longer needed. The application now uses the normalized fields directly
-// from the booking and expense objects.
 
 /**
  * Get unmatched bookings
