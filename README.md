@@ -9,6 +9,8 @@ A React application that helps match travel booking data with expense reports to
 - Automatically match bookings with expenses based on multiple criteria
 - View detailed match results and statistics
 - Identify unmatched bookings and expenses
+- Performance-optimized batch processing to handle large datasets
+- Detailed progress tracking during matching operations
 
 ## Data Normalization
 
@@ -24,6 +26,24 @@ The application performs extensive normalization on the following fields to impr
 - Transaction Time
 - Traveler Name
 
+## Matching Algorithm
+
+The application uses a sophisticated scoring system to match bookings with expenses:
+- Card last 4 matching (highest weight)
+- Amount matching with fuzzy comparison
+- Name matching (traveler name vs. employee name)
+- Reference number matching
+- Vendor/merchant name matching
+- Special handling for flight bookings with additional criteria
+
+## Performance Optimization
+
+The matching process is optimized to handle large datasets without freezing the UI:
+- Batch processing breaks down the matching operation into smaller chunks
+- Progress tracking with visual feedback during processing
+- Asynchronous execution that yields to the UI thread
+- Set-based string comparison for improved efficiency
+
 ## Supported TMCs
 
 Currently supports booking data from:
@@ -37,6 +57,15 @@ Currently supports booking data from:
 - TravelBank
 - ITILITE
 - And others
+
+## Recent Improvements
+
+- **Performance Enhancement**: Implemented batch processing for matching operations to prevent UI freezing
+- **Validation Improvement**: Updated card holder name validation to be more permissive while maintaining security
+- **Bug Fixes**:
+  - Fixed regular expression escape character issues in string normalization
+  - Resolved TypeScript compilation errors related to Set iteration
+  - Fixed currency mapping errors related to undefined properties
 
 ## Technologies
 
@@ -70,3 +99,9 @@ Launches the test runner in the interactive watch mode.
 ### `npm run build`
 
 Builds the app for production to the `build` folder.
+
+## Development Notes
+
+- Use `npm run build` to create a production build for deployment
+- The app automatically fixes data issues in the booking data before matching
+- For large datasets, the batch processing system provides progress updates during matching
