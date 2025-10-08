@@ -66,14 +66,58 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
       (booking.origin && booking.destination)
     );
 
-    // Must also be a Mastercard booking
-    const isMastercard = booking.cardTypeNormalized === 'Mastercard';
+    // Must also be a Mastercard booking (case insensitive comparison)
+    const isMastercard = booking.cardTypeNormalized?.toLowerCase() === 'mastercard';
 
     // Return true only if both conditions are met
     return isFlightBooking && isMastercard;
   });
 
-  console.log(`DEBUG: [FlightsEval] Found ${flightBookings.length} Mastercard flight bookings`);
+  // Debug: Count all flight bookings vs. Mastercard flight bookings
+  const allFlightBookings = bookings.filter(booking => (
+    booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+    booking.travelType?.toLowerCase()?.includes('flight') ||
+    booking.travelType?.toLowerCase()?.includes('air') ||
+    booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
+    booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
+    booking.vendor?.toLowerCase()?.includes('airline') ||
+    booking.vendor?.toLowerCase()?.includes('airways') ||
+    booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
+    booking.merchantNormalized?.toLowerCase()?.includes('united') ||
+    booking.merchantNormalized?.toLowerCase()?.includes('american') ||
+    (booking.origin && booking.destination)
+  ));
+
+  // Count the Mastercard ones only
+  const mastercardFlightBookings = allFlightBookings.filter(booking =>
+    booking.cardTypeNormalized?.toLowerCase() === 'mastercard'
+  );
+
+  // Count using different filtering criteria
+  const exactFlightCount = bookings.filter(b => b.bookingTypeNormalized === 'Flight').length;
+  const caseInsensitiveFlightCount = bookings.filter(b => b.bookingTypeNormalized?.toLowerCase() === 'flight').length;
+
+  const exactMastercardFlightCount = bookings.filter(
+    b => b.bookingTypeNormalized === 'Flight' &&
+        b.cardTypeNormalized?.toLowerCase() === 'mastercard'
+  ).length;
+
+  // Additional test to check for variations in the cardTypeNormalized field
+  const allCardTypes = new Set<string>();
+  bookings.forEach(b => {
+    if (b.cardTypeNormalized) {
+      allCardTypes.add(b.cardTypeNormalized);
+    }
+  });
+  console.log('All card types found in data:', Array.from(allCardTypes));
+
+  console.log(`DEBUG: [FlightsEval] Stats:`);
+  console.log(`  All flight bookings (loose criteria): ${allFlightBookings.length}`);
+  console.log(`  Mastercard flight bookings (loose criteria): ${mastercardFlightBookings.length}`);
+  console.log(`  Exact Flight type count (case sensitive): ${exactFlightCount}`);
+  console.log(`  Exact Flight type count (case insensitive): ${caseInsensitiveFlightCount}`);
+  console.log(`  Exact Mastercard Flight type count: ${exactMastercardFlightCount}`);
+  console.log(`  Current filtered count: ${flightBookings.length} Mastercard flight bookings`);
 
   // Create maps for looking up matches by different IDs
   const matchesByBookingRef = new Map<string, MatchResult>();

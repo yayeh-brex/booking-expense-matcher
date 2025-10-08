@@ -275,8 +275,8 @@ export class SimpleFlightMatcher {
         (booking.origin && booking.destination)
       );
 
-      // Must also be a Mastercard booking
-      const isMastercard = booking.cardTypeNormalized === 'Mastercard';
+      // Must also be a Mastercard booking (case insensitive comparison)
+      const isMastercard = booking.cardTypeNormalized?.toLowerCase() === 'mastercard';
 
       // Return true only if both conditions are met
       return isFlightBooking && isMastercard;
