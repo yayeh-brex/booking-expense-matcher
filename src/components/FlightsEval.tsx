@@ -98,28 +98,15 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
         return result;
       });
 
-    // Key fix: Limit the bookings to the expected count
-    console.log(`[FlightsEval] Found ${filteredBookings.length} flight bookings before limiting`);
+    // The count should now be accurate without limiting since all classification is done in DataFixerService
+    console.log(`[FlightsEval] Found ${filteredBookings.length} flight bookings from accurate filtering`);
 
-    // Only apply limiting if we have a valid expected count and it differs from the filtered count
+    // Verify the count matches what we expect from DataFixerService
     if (expectedFlightCount > 0 && filteredBookings.length !== expectedFlightCount) {
-      console.log(`[FlightsEval] Filtered count (${filteredBookings.length}) differs from DataFixerService count (${expectedFlightCount})`);
-
-      if (filteredBookings.length > expectedFlightCount) {
-        // Sort by bookingIdNormalized so we get a consistent subset
-        filteredBookings.sort((a, b) => {
-          const idA = a.bookingIdNormalized || '';
-          const idB = b.bookingIdNormalized || '';
-          return idA.localeCompare(idB);
-        });
-
-        // Limit to the expected count
-        console.log(`[FlightsEval] Limiting to ${expectedFlightCount} bookings to match expected count`);
-        filteredBookings = filteredBookings.slice(0, expectedFlightCount);
-      } else {
-        // If we have fewer bookings than expected, just log it
-        console.log(`[FlightsEval] WARNING: Found fewer bookings (${filteredBookings.length}) than expected (${expectedFlightCount})`);
-      }
+      console.log(`[FlightsEval] WARNING: Filtered count (${filteredBookings.length}) differs from DataFixerService count (${expectedFlightCount})`);
+      console.log(`[FlightsEval] This should not happen since all classification is now in DataFixerService`);
+    } else if (expectedFlightCount > 0) {
+      console.log(`[FlightsEval] ✅ Filtered count matches DataFixerService count (${expectedFlightCount})`);
     }
 
     // Save filtered bookings to state
@@ -304,11 +291,11 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                   </tr>
                 </tbody>
               </Table>
-              <div className="alert alert-info mt-2 mb-0">
+              <div className="alert alert-success mt-2 mb-0">
                 <small>
-                  <strong>Note:</strong> Post-processing in App.tsx modifies booking data after
-                  DataFixerService counts them. We're dynamically limiting to the count from DataFixerService
-                  ({expectedFlightCount}) to ensure consistency across different booking reports.
+                  <strong>Note:</strong> All flight classification logic now runs in DataFixerService
+                  before any counts are calculated. This ensures accuracy and consistency
+                  across different booking reports without requiring any limiting.
                 </small>
               </div>
             </Card.Body>

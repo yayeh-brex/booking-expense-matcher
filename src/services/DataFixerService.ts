@@ -55,22 +55,57 @@ export const applyDataFixes = (bookings: BookingData[]): DataFixResult => {
       masterCardFixed++;
     }
 
-    // Fix 2: Ensure booking types are correctly set
+    // Fix 2: Ensure booking types are correctly set - ENHANCED version with all checks from App.tsx
+    let typeWasFixed = false;
+
+    // Direct check for FLIGHT in Type field
     if (booking.rawData && booking.rawData['Type']) {
       const type = booking.rawData['Type'];
 
       if (type.toLowerCase().includes('flight')) {
         booking.bookingTypeNormalized = 'Flight';
         typeFixed++;
+        typeWasFixed = true;
       } else if (type.toLowerCase().includes('hotel')) {
         booking.bookingTypeNormalized = 'Hotel';
         typeFixed++;
+        typeWasFixed = true;
       } else if (type.toLowerCase().includes('car')) {
         booking.bookingTypeNormalized = 'Car';
         typeFixed++;
+        typeWasFixed = true;
       } else if (type.toLowerCase().includes('rail')) {
         booking.bookingTypeNormalized = 'Rail';
         typeFixed++;
+        typeWasFixed = true;
+      }
+    }
+
+    // If we haven't fixed the type yet, check for additional flight indicators
+    if (!typeWasFixed) {
+      // Check travel type for flight-related keywords
+      if (booking.travelType &&
+          (booking.travelType.toLowerCase().includes('flight') ||
+           booking.travelType.toLowerCase().includes('air'))) {
+        booking.bookingTypeNormalized = 'Flight';
+        typeFixed++;
+        typeWasFixed = true;
+      }
+      // Check vendor for airline names
+      else if (booking.vendor) {
+        const vendorLower = booking.vendor.toLowerCase();
+        const airlineNames = [
+          'delta', 'american', 'united', 'southwest', 'alaska', 'jetblue', 'frontier', 'spirit',
+          'lufthansa', 'british airways', 'air france', 'klm', 'emirates', 'qatar', 'etihad',
+          'singapore airlines', 'cathay pacific', 'air canada', 'virgin', 'qantas',
+          'aa', 'dl', 'ua', 'wn', 'as', 'b6', 'f9', 'nk', 'lh', 'ba', 'af', 'kl', 'ek', 'qr', 'ey',
+          'sq', 'cx', 'ac', 'vs', 'qf'
+        ];
+        if (airlineNames.some(airline => vendorLower.includes(airline))) {
+          booking.bookingTypeNormalized = 'Flight';
+          typeFixed++;
+          typeWasFixed = true;
+        }
       }
     }
   });

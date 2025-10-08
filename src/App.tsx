@@ -240,43 +240,11 @@ function App() {
           console.log(`DEBUG: [App] Data fixes applied: ${stats.masterCardFixed} card types fixed, ${stats.typeFixed} booking types fixed`);
           console.log(`DEBUG: [App] After fixes: ${stats.totalMastercard} Mastercard bookings, Flight: ${stats.flightCount}, Hotel: ${stats.hotelCount}, Car: ${stats.carCount}, Rail: ${stats.railCount}`);
 
-          // Explicitly set bookingTypeNormalized for flights based on travel type or type field
-          // This is to fix the issue with flight matching
-          console.log(`DEBUG: [App] Processing ${bookings.length} bookings for flight type identification`);
+          // All flight classification is now done in DataFixerService.ts
+          // This ensures the flight count is accurate before any additional processing
+
+          // Just log key flight booking details for debugging
           bookings.forEach((booking, idx) => {
-            // Direct check for FLIGHT in Navan data
-            if (booking.rawData && booking.rawData.Type === 'FLIGHT') {
-              booking.bookingTypeNormalized = 'Flight';
-              console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on Type=FLIGHT`);
-            }
-            // Check travel type for flight-related keywords
-            else if (booking.travelType &&
-              (booking.travelType.toLowerCase().includes('flight') ||
-               booking.travelType.toLowerCase().includes('air'))) {
-              booking.bookingTypeNormalized = 'Flight';
-              console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on travelType=${booking.travelType}`);
-            }
-            // Check vendor for airline names using our airline check function
-            else if (booking.vendor) {
-              const vendorLower = booking.vendor.toLowerCase();
-              const airlineNames = [
-                'delta', 'american', 'united', 'southwest', 'alaska', 'jetblue', 'frontier', 'spirit',
-                'lufthansa', 'british airways', 'air france', 'klm', 'emirates', 'qatar', 'etihad',
-                'singapore airlines', 'cathay pacific', 'air canada', 'virgin', 'qantas',
-                'aa', 'dl', 'ua', 'wn', 'as', 'b6', 'f9', 'nk', 'lh', 'ba', 'af', 'kl', 'ek', 'qr', 'ey',
-                'sq', 'cx', 'ac', 'vs', 'qf'
-              ];
-
-              if (airlineNames.some(airline => vendorLower.includes(airline))) {
-                booking.bookingTypeNormalized = 'Flight';
-                console.log(`DEBUG: [App] Setting Flight type for booking ${booking.id || idx} based on vendor=${booking.vendor}`);
-              }
-            }
-
-            // Always log the final booking type for debugging
-            console.log(`DEBUG: [App] Booking ${booking.id || idx} final type: ${booking.bookingTypeNormalized || 'Not set'}`);
-
-            // For any booking with type "Flight", also print out the key fields for debugging
             if (booking.bookingTypeNormalized === 'Flight') {
               console.log(`DEBUG: [App] Flight booking details: ${JSON.stringify({
                 id: booking.id || idx,
