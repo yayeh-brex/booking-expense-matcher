@@ -32,6 +32,44 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   useEffect(() => {
     console.log(`DEBUG: [FlightsEval] Advanced debugging to solve the 705 count issue...`);
 
+    // ============= TEST VERIFICATION =============
+    // This is a test to verify the expected count of 705 flight bookings
+    console.log('===== FLIGHT BOOKING COUNT VERIFICATION TEST =====');
+
+    // Test 1: Check using the exact same code as in DataFixerService.ts
+    const dataFixerServiceCount = bookings.filter(
+      b => b.cardTypeNormalized === 'Mastercard' && b.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`TEST 1: Using exact DataFixerService filter code: ${dataFixerServiceCount} bookings`);
+
+    // Test 2: Check with case-insensitive comparison
+    const caseInsensitiveCount = bookings.filter(
+      b => b.cardTypeNormalized?.toLowerCase() === 'mastercard' &&
+           b.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`TEST 2: Using case-insensitive card type: ${caseInsensitiveCount} bookings`);
+
+    // Test 3: Check raw Credit Card Network field
+    const rawNetworkCount = bookings.filter(
+      b => b.rawData &&
+           b.rawData['Credit Card Network'] === 'MasterCard' &&
+           b.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`TEST 3: Using raw 'Credit Card Network' field: ${rawNetworkCount} bookings`);
+
+    // Test 4: Check combined criteria (most permissive)
+    const combinedCount = bookings.filter(
+      b => (b.cardTypeNormalized === 'Mastercard' ||
+            (b.rawData && b.rawData['Credit Card Network'] === 'MasterCard')) &&
+           b.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`TEST 4: Using combined criteria: ${combinedCount} bookings`);
+
+    // Log the expected count from TestReportValues
+    console.log(`EXPECTED COUNT from TestReportValues: 705 bookings`);
+    console.log('====================================================');
+    // ==============================================
+
     // Filter bookings to find Mastercard + Flight bookings
     // This specifically applies DataFixerService-style filtering, ignoring any post-processing
     const filteredBookings = bookings
@@ -61,6 +99,13 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
     // Save filtered bookings to state
     setFlightBookings(filteredBookings);
     console.log(`DEBUG: [FlightsEval] Using filtered data approach: Found ${filteredBookings.length} Mastercard+Flight bookings`);
+
+    // Report if the count matches the expected 705
+    if (filteredBookings.length === 705) {
+      console.log('✅ SUCCESS: Flight bookings count matches expected 705');
+    } else {
+      console.log(`❌ FAILURE: Flight bookings count ${filteredBookings.length} does NOT match expected 705`);
+    }
 
     // Create matcher instance
     const flightMatcher = new SimpleFlightMatcher();
@@ -161,6 +206,17 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
     return 'danger';
   };
 
+  // Get test counts for display in the UI
+  const dataFixerServiceCount = bookings.filter(
+    b => b.cardTypeNormalized === 'Mastercard' && b.bookingTypeNormalized === 'Flight'
+  ).length;
+
+  const rawNetworkCount = bookings.filter(
+    b => b.rawData &&
+        b.rawData['Credit Card Network'] === 'MasterCard' &&
+        b.bookingTypeNormalized === 'Flight'
+  ).length;
+
   return (
     <div>
       {/* Flight Bookings Statistics */}
@@ -187,6 +243,41 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                 <div className={styles.statLabel}>Match Rate</div>
                 <div className={styles.statValue}>{matchRate.toFixed(1)}%</div>
               </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={8}>
+          <Card className={`h-100 ${styles.statCard}`}>
+            <Card.Header className="bg-info text-white">
+              <h6 className="mb-0">Debug Counts (Expected: 705)</h6>
+            </Card.Header>
+            <Card.Body>
+              <Table size="sm">
+                <thead>
+                  <tr>
+                    <th>Test Method</th>
+                    <th>Count</th>
+                    <th>Match?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>DataFixerService filter code</td>
+                    <td>{dataFixerServiceCount}</td>
+                    <td>{dataFixerServiceCount === 705 ? '✅' : '❌'}</td>
+                  </tr>
+                  <tr>
+                    <td>Raw 'Credit Card Network' field</td>
+                    <td>{rawNetworkCount}</td>
+                    <td>{rawNetworkCount === 705 ? '✅' : '❌'}</td>
+                  </tr>
+                  <tr>
+                    <td>Current filtering approach</td>
+                    <td>{flightBookings.length}</td>
+                    <td>{flightBookings.length === 705 ? '✅' : '❌'}</td>
+                  </tr>
+                </tbody>
+              </Table>
             </Card.Body>
           </Card>
         </Col>
