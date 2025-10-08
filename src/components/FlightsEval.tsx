@@ -39,11 +39,6 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
     console.log(`[FlightsEval] Found ${matches.length} matches using SimpleFlightMatcher`);
   }, [bookings, expenses]);
 
-  // Create map of expense IDs to match results for quick lookup
-  const matchesByExpenseId = new Map<string, MatchResult>();
-  flightMatches.forEach(match => {
-    matchesByExpenseId.set(match.expenseId, match);
-  });
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage] = useState<number>(10);
@@ -71,15 +66,21 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
   console.log(`DEBUG: [FlightsEval] Found ${flightBookings.length} flight bookings`);
 
-  // Create a map of booking IDs to match results for efficient lookup
-  const matchesByBookingId = new Map<string, MatchResult>();
+  // Create maps for looking up matches by different IDs
+  const matchesByUniqueId = new Map<string, MatchResult>();
+  const matchesByExpenseId = new Map<string, MatchResult>();
+
   flightMatches.forEach(match => {
-    matchesByBookingId.set(match.bookingId, match);
+    // Map by unique identifier (booking ID in the Eval Table)
+    matchesByUniqueId.set(match.bookingId, match);
+
+    // Map by expense ID
+    matchesByExpenseId.set(match.expenseId, match);
   });
 
   // Statistics about matches
   const matchedFlightBookingsCount = flightBookings.filter(booking =>
-    booking.id && matchesByBookingId.has(booking.id)
+    booking.id && matchesByUniqueId.has(booking.id)
   ).length;
 
   const unmatchedFlightBookingsCount = flightBookings.length - matchedFlightBookingsCount;
@@ -133,6 +134,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
             <tr>
               <th>Match Confidence</th>
               <th>Unique Identifier</th>
+              <th>Booking ID Normalized</th>
               <th>BookingType</th>
               <th>Booking Merchant</th>
               <th>Card Type</th>
@@ -143,6 +145,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
               <th>Booking Date</th>
               <th>Traveler Name</th>
               {/* Expense Data Columns */}
+              <th>Expense ID</th>
               <th>Expense User</th>
               <th>Expense Category</th>
               <th>Expense Merchant</th>
@@ -154,13 +157,15 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
             {flightBookings
               .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
               .map((booking, index) => {
-                // Find matching result if any
-                const matchResult = booking.id ? matchesByBookingId.get(booking.id) : undefined;
+                // Find matching result if any using the unique identifier
+                const uniqueId = booking.id || `booking-${index}`;
+                const matchResult = uniqueId ? matchesByUniqueId.get(uniqueId) : undefined;
+
                 // Get expense data if there's a match
                 const expense = matchResult?.expenseId ? getExpenseById(matchResult.expenseId) : undefined;
 
                 return (
-                  <tr key={index}>
+                  <tr key={index} className={!matchResult ? styles.unmatchedRow : ''}>
                     <td className="text-center">
                       {matchResult ? (
                         <Badge bg={getConfidenceBadgeVariant(matchResult.matchConfidence)}>
@@ -170,22 +175,32 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                         <Badge bg="secondary">Unmatched</Badge>
                       )}
                     </td>
-                    <td>{booking.id || `booking-${index}`}</td>
+                    <td className={styles.textHighlight}>{uniqueId}</td>
+                    <td>{booking.bookingIdNormalized || '[No booking ID found]'}</td>
                     <td>{booking.bookingTypeNormalized || 'Flight'}</td>
                     <td>{booking.merchantNormalized || booking.vendor || '[No merchant found]'}</td>
                     <td>{booking.cardTypeNormalized || '[No card type found]'}</td>
-                    <td>{booking.cardLast4Normalized || '[No card last 4 found]'}</td>
+                    <td className={matchResult ? styles.textHighlight : ''}>
+                      {booking.cardLast4Normalized || '[No card last 4 found]'}
+                    </td>
                     <td>{booking.cardHolderNameNormalized || '[No card holder name found]'}</td>
                     <td>{booking.currencyNormalized || '[No currency found]'}</td>
-                    <td>{booking.amountNormalized !== undefined ? booking.amountNormalized.toFixed(2) : '[No amount found]'}</td>
+                    <td className={matchResult ? styles.textHighlight : ''}>
+                      {booking.amountNormalized !== undefined ? booking.amountNormalized.toFixed(2) : '[No amount found]'}
+                    </td>
                     <td>{booking.bookingExpectTxTimeNormalized || '[No booking time found]'}</td>
                     <td>{booking.travelerNameNormalized || booking.travelerName || '[No traveler name found]'}</td>
 
                     {/* Expense Data - Show if matched, otherwise show placeholders */}
+                    <td className={matchResult ? styles.textHighlight : ''}>
+                      {matchResult ? matchResult.expenseId : '-'}
+                    </td>
                     <td>{expense?.employeeName || '-'}</td>
                     <td>{expense?.expenseType || '-'}</td>
-                    <td>{expense?.vendor || '-'}</td>
-                    <td>
+                    <td className={matchResult ? styles.textHighlight : ''}>
+                      {expense?.vendor || '-'}
+                    </td>
+                    <td className={matchResult ? styles.textHighlight : ''}>
                       {expense?.amount !== undefined
                         ? `${expense.amount.toFixed(2)} ${expense.currency || ''}`
                         : '-'
