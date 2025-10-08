@@ -134,16 +134,16 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
             <tr>
               <th>Match Confidence</th>
               <th>Booking Ref</th>
-              <th>Booking ID Normalized</th>
-              <th>BookingType</th>
-              <th>Booking Merchant</th>
-              <th>Card Type</th>
-              <th>Card Last4</th>
-              <th>Card Holder Name</th>
-              <th>Booking Currency</th>
-              <th>Booking Amount</th>
-              <th>Booking Date</th>
-              <th>Traveler Name</th>
+              <th>Booking_ID_Normalized</th>
+              <th>BookingType_Normalized</th>
+              <th>Booking_Merchant_Normalized</th>
+              <th>Booking_CARD_Normalized</th>
+              <th>Booking_Last4_Normalized</th>
+              <th>Booking_NameonCard_Normalized</th>
+              <th>Booking_Currency_Normalized</th>
+              <th>Booking_Amount_Normalized</th>
+              <th>Booking_Expect_Tx_Time_Normalized</th>
+              <th>Booking_Traveler_Normalized</th>
               {/* Expense Data Columns */}
               <th>Expense ID</th>
               <th>Expense User</th>
