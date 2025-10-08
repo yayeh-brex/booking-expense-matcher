@@ -67,6 +67,21 @@ function App() {
   const [parsedExpenses, setParsedExpenses] = useState<ExpenseData[] | null>(null);
   const expenseInputRef = useRef<HTMLInputElement>(null);
 
+  // DataFixerService stats - key for storing the accurate counts
+  const [dataFixerStats, setDataFixerStats] = useState<{
+    totalMastercard: number;
+    flightCount: number;
+    hotelCount: number;
+    carCount: number;
+    railCount: number;
+  }>({
+    totalMastercard: 0,
+    flightCount: 0,
+    hotelCount: 0,
+    carCount: 0,
+    railCount: 0
+  });
+
   // Shared states
   const [error, setError] = useState<string | null>(null);
   const [isParsingLoading, setIsParsingLoading] = useState<boolean>(false);
@@ -212,6 +227,16 @@ function App() {
           console.log(`DEBUG: [App] Automatically applying data fixes to ${bookings.length} bookings`);
           const { fixedBookings, stats } = applyDataFixes(bookings);
           bookings = fixedBookings;
+
+          // Store the DataFixerService stats in state
+          setDataFixerStats({
+            totalMastercard: stats.totalMastercard,
+            flightCount: stats.flightCount,
+            hotelCount: stats.hotelCount,
+            carCount: stats.carCount,
+            railCount: stats.railCount
+          });
+
           console.log(`DEBUG: [App] Data fixes applied: ${stats.masterCardFixed} card types fixed, ${stats.typeFixed} booking types fixed`);
           console.log(`DEBUG: [App] After fixes: ${stats.totalMastercard} Mastercard bookings, Flight: ${stats.flightCount}, Hotel: ${stats.hotelCount}, Car: ${stats.carCount}, Rail: ${stats.railCount}`);
 
@@ -753,7 +778,7 @@ function App() {
                 expenses={parsedExpenses}
                 getBookingById={getBookingById}
                 getExpenseById={getExpenseById}
-                expectedFlightCount={705} // Pass the expected count from DataFixerService
+                expectedFlightCount={dataFixerStats.flightCount} // Dynamically pass the count from DataFixerService
               />
             </div>
           </Col>

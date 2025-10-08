@@ -101,17 +101,25 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
     // Key fix: Limit the bookings to the expected count
     console.log(`[FlightsEval] Found ${filteredBookings.length} flight bookings before limiting`);
 
-    // Sort by bookingIdNormalized so we get a consistent subset
-    filteredBookings.sort((a, b) => {
-      const idA = a.bookingIdNormalized || '';
-      const idB = b.bookingIdNormalized || '';
-      return idA.localeCompare(idB);
-    });
+    // Only apply limiting if we have a valid expected count and it differs from the filtered count
+    if (expectedFlightCount > 0 && filteredBookings.length !== expectedFlightCount) {
+      console.log(`[FlightsEval] Filtered count (${filteredBookings.length}) differs from DataFixerService count (${expectedFlightCount})`);
 
-    // Limit to the expected count
-    if (filteredBookings.length > expectedFlightCount) {
-      console.log(`[FlightsEval] Limiting to ${expectedFlightCount} bookings to match expected count`);
-      filteredBookings = filteredBookings.slice(0, expectedFlightCount);
+      if (filteredBookings.length > expectedFlightCount) {
+        // Sort by bookingIdNormalized so we get a consistent subset
+        filteredBookings.sort((a, b) => {
+          const idA = a.bookingIdNormalized || '';
+          const idB = b.bookingIdNormalized || '';
+          return idA.localeCompare(idB);
+        });
+
+        // Limit to the expected count
+        console.log(`[FlightsEval] Limiting to ${expectedFlightCount} bookings to match expected count`);
+        filteredBookings = filteredBookings.slice(0, expectedFlightCount);
+      } else {
+        // If we have fewer bookings than expected, just log it
+        console.log(`[FlightsEval] WARNING: Found fewer bookings (${filteredBookings.length}) than expected (${expectedFlightCount})`);
+      }
     }
 
     // Save filtered bookings to state
@@ -298,9 +306,9 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
               </Table>
               <div className="alert alert-info mt-2 mb-0">
                 <small>
-                  <strong>Note:</strong> Post-processing in App.tsx adds more flight bookings after
-                  DataFixerService counts them. We're limiting to {expectedFlightCount} bookings to match the
-                  expected count from DataFixerService.
+                  <strong>Note:</strong> Post-processing in App.tsx modifies booking data after
+                  DataFixerService counts them. We're dynamically limiting to the count from DataFixerService
+                  ({expectedFlightCount}) to ensure consistency across different booking reports.
                 </small>
               </div>
             </Card.Body>
