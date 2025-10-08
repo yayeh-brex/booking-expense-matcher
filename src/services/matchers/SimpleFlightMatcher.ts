@@ -30,7 +30,7 @@ export class SimpleFlightMatcher {
     // For each flight booking, try to find the best matching expense
     flightBookings.forEach((booking, bookingIndex) => {
       // Important: We need both identifiers:
-      // 1. The booking ref for the Bookings Normalized Table row
+      // 1. The booking ref for the Flights Eval Table row
       const bookingRef = booking.id || `booking-${bookingIndex}`;
 
       // 2. The Booking_ID_Normalized from the original booking data
@@ -76,7 +76,7 @@ export class SimpleFlightMatcher {
       if (bestMatch && bestMatch.score >= MINIMUM_CONFIDENCE) {
         // Add to matches - here we store three pieces of information:
         // 1. expenseId: The ID from the expense report
-        // 2. bookingId: The Booking Ref from the Bookings Normalized Table
+        // 2. bookingId: The Booking Ref from the Flights Eval Table
         // 3. We can include the bookingIdNormalized in the match reasons
         matches.push({
           expenseId: bestMatch.expenseId,

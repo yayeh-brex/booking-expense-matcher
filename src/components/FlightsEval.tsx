@@ -71,7 +71,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   const matchesByExpenseId = new Map<string, MatchResult>();
 
   flightMatches.forEach(match => {
-    // Map by booking ref (booking ID in the Bookings Normalized Table)
+    // Map by booking ref (booking ID in the original booking data)
     matchesByBookingRef.set(match.bookingId, match);
 
     // Map by expense ID
