@@ -94,7 +94,7 @@ const FlightsNormalizedTable: React.FC<FlightsNormalizedTableProps> = ({ expense
 
                 return (
                   <tr key={expenseIndex}>
-                    <td className={styles.textHighlight}>{expense.id || `expense-${expenseIndex}`}</td>
+                    <td className={styles.textHighlight}>{expense.id || '[No expense ID]'}</td>
                     <td>{expense.employeeName || '[No employee name]'}</td>
                     <td>{expense.vendor || '[No vendor]'}</td>
                     <td className={styles.textHighlight}>
