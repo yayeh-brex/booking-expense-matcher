@@ -5,8 +5,8 @@ export function parseExpenseData(rawData: Record<string, any>[]): ExpenseData[] 
   return rawData.map((row, index) => {
     // Basic expense data
     const expense: ExpenseData = {
-      // Generate an ID for the expense
-      id: `expense-${index}`,
+      // Look for actual expense ID in the data, fallback to index if not found
+      id: findField(row, ['expense_id', 'id', 'expense_number', 'transaction_id', 'receipt_id']) || `expense-${index}`,
 
       // Try to map common expense fields
       expenseDate: findField(row, ['expense_date', 'date', 'transaction_date', 'posted_date']),
