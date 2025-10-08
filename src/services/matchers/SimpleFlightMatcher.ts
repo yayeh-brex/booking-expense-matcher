@@ -17,9 +17,9 @@ export class SimpleFlightMatcher {
    * @returns Array of match results
    */
   public findMatches(bookings: BookingData[], expenses: ExpenseData[]): MatchResult[] {
-    // Filter to only flight bookings
+    // Filter to only Mastercard flight bookings
     const flightBookings = this.filterFlightBookings(bookings);
-    console.log(`[SimpleFlightMatcher] Found ${flightBookings.length} flight bookings`);
+    console.log(`[SimpleFlightMatcher] Found ${flightBookings.length} Mastercard flight bookings`);
 
     // Matches array to return
     const matches: MatchResult[] = [];
@@ -251,27 +251,36 @@ export class SimpleFlightMatcher {
   }
 
   /**
-   * Filter bookings to only include flight bookings
+   * Filter bookings to only include Mastercard flight bookings
    */
   private filterFlightBookings(bookings: BookingData[]): BookingData[] {
-    return bookings.filter(booking => (
-      // Check normalized type
-      booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-      // Check travel type for flight keywords
-      booking.travelType?.toLowerCase()?.includes('flight') ||
-      booking.travelType?.toLowerCase()?.includes('air') ||
-      // Check merchant/vendor for airline names
-      booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
-      booking.vendor?.toLowerCase()?.includes('airline') ||
-      booking.vendor?.toLowerCase()?.includes('airways') ||
-      // Check for common airline names
-      booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('united') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('american') ||
-      // Check origin/destination (flights typically have both)
-      (booking.origin && booking.destination)
-    ));
+    return bookings.filter(booking => {
+      // Must be a flight booking
+      const isFlightBooking = (
+        // Check normalized type
+        booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+        // Check travel type for flight keywords
+        booking.travelType?.toLowerCase()?.includes('flight') ||
+        booking.travelType?.toLowerCase()?.includes('air') ||
+        // Check merchant/vendor for airline names
+        booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
+        booking.vendor?.toLowerCase()?.includes('airline') ||
+        booking.vendor?.toLowerCase()?.includes('airways') ||
+        // Check for common airline names
+        booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('united') ||
+        booking.merchantNormalized?.toLowerCase()?.includes('american') ||
+        // Check origin/destination (flights typically have both)
+        (booking.origin && booking.destination)
+      );
+
+      // Must also be a Mastercard booking
+      const isMastercard = booking.cardTypeNormalized === 'Mastercard';
+
+      // Return true only if both conditions are met
+      return isFlightBooking && isMastercard;
+    });
   }
 
   /**

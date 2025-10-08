@@ -43,28 +43,37 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage] = useState<number>(10);
 
-  // Filter only flight bookings
-  console.log(`DEBUG: [FlightsEval] Filtering flight bookings from ${bookings.length} total bookings`);
-  const flightBookings = bookings.filter(booking => (
-    // Check normalized type
-    booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-    // Check travel type for flight keywords
-    booking.travelType?.toLowerCase()?.includes('flight') ||
-    booking.travelType?.toLowerCase()?.includes('air') ||
-    // Check merchant/vendor for airline names
-    booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
-    booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
-    booking.vendor?.toLowerCase()?.includes('airline') ||
-    booking.vendor?.toLowerCase()?.includes('airways') ||
-    // Check for common airline names
-    booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
-    booking.merchantNormalized?.toLowerCase()?.includes('united') ||
-    booking.merchantNormalized?.toLowerCase()?.includes('american') ||
-    // Check origin/destination (flights typically have both)
-    (booking.origin && booking.destination)
-  ));
+  // Filter only Mastercard flight bookings
+  console.log(`DEBUG: [FlightsEval] Filtering Mastercard flight bookings from ${bookings.length} total bookings`);
+  const flightBookings = bookings.filter(booking => {
+    // Must be a flight booking
+    const isFlightBooking = (
+      // Check normalized type
+      booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
+      // Check travel type for flight keywords
+      booking.travelType?.toLowerCase()?.includes('flight') ||
+      booking.travelType?.toLowerCase()?.includes('air') ||
+      // Check merchant/vendor for airline names
+      booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
+      booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
+      booking.vendor?.toLowerCase()?.includes('airline') ||
+      booking.vendor?.toLowerCase()?.includes('airways') ||
+      // Check for common airline names
+      booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
+      booking.merchantNormalized?.toLowerCase()?.includes('united') ||
+      booking.merchantNormalized?.toLowerCase()?.includes('american') ||
+      // Check origin/destination (flights typically have both)
+      (booking.origin && booking.destination)
+    );
 
-  console.log(`DEBUG: [FlightsEval] Found ${flightBookings.length} flight bookings`);
+    // Must also be a Mastercard booking
+    const isMastercard = booking.cardTypeNormalized === 'Mastercard';
+
+    // Return true only if both conditions are met
+    return isFlightBooking && isMastercard;
+  });
+
+  console.log(`DEBUG: [FlightsEval] Found ${flightBookings.length} Mastercard flight bookings`);
 
   // Create maps for looking up matches by different IDs
   const matchesByBookingRef = new Map<string, MatchResult>();
