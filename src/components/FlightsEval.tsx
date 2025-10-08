@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Table, Badge, Pagination } from 'react-bootstrap';
 import { MatchResult } from '../types/ExpenseData';
 import { BookingData } from '../types/BookingData';
 import { ExpenseData } from '../types/ExpenseData';
+import { SimpleFlightMatcher } from '../services/matchers/SimpleFlightMatcher';
 import styles from './FlightsEval.module.css';
 
 // Props interface for the FlightsEval component
 interface FlightsEvalProps {
-  matches: MatchResult[];
+  matches: MatchResult[]; // Original matches from MatchingService
   bookings: BookingData[];
   expenses: ExpenseData[];
   getBookingById: (id: string) => BookingData | undefined;
@@ -15,12 +16,34 @@ interface FlightsEvalProps {
 }
 
 const FlightsEval: React.FC<FlightsEvalProps> = ({
-  matches,
+  matches: originalMatches, // Rename to make clear we're not using directly
   bookings,
   expenses,
   getBookingById,
   getExpenseById
 }) => {
+  // State to store our own flight-specific matches using the simple matcher
+  const [flightMatches, setFlightMatches] = useState<MatchResult[]>([]);
+
+  // Initialize the simple flight matcher when component loads
+  useEffect(() => {
+    // Create matcher instance
+    const flightMatcher = new SimpleFlightMatcher();
+
+    // Find matches using our simplified approach
+    const matches = flightMatcher.findMatches(bookings, expenses);
+
+    // Update state with matches
+    setFlightMatches(matches);
+
+    console.log(`[FlightsEval] Found ${matches.length} matches using SimpleFlightMatcher`);
+  }, [bookings, expenses]);
+
+  // Create map of expense IDs to match results for quick lookup
+  const matchesByExpenseId = new Map<string, MatchResult>();
+  flightMatches.forEach(match => {
+    matchesByExpenseId.set(match.expenseId, match);
+  });
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage] = useState<number>(10);
@@ -50,7 +73,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
   // Create a map of booking IDs to match results for efficient lookup
   const matchesByBookingId = new Map<string, MatchResult>();
-  matches.forEach(match => {
+  flightMatches.forEach(match => {
     matchesByBookingId.set(match.bookingId, match);
   });
 
