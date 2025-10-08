@@ -17,11 +17,18 @@ export class SimpleFlightMatcher {
    * @returns Array of match results
    */
   public findMatches(bookings: BookingData[], expenses: ExpenseData[]): MatchResult[] {
-    // Filter to only Mastercard flight bookings with EXACT matching
+    // Filter using DataFixerService-consistent approach
     const flightBookings = this.filterFlightBookings(bookings);
-    console.log(`[SimpleFlightMatcher] Found ${flightBookings.length} bookings with EXACT 'Mastercard'+'Flight' values`);
+    console.log(`[SimpleFlightMatcher] Using DataFixerService-consistent approach: Found ${flightBookings.length} bookings`);
 
-    // Count with case insensitive matching for comparison
+    // Count with direct approach for comparison
+    const directMatchCount = bookings.filter(booking =>
+      booking.cardTypeNormalized === 'Mastercard' &&
+      booking.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`[SimpleFlightMatcher] Direct filtering found ${directMatchCount} bookings`);
+
+    // Also check with case-insensitive matching
     const caseInsensitiveCount = bookings.filter(booking =>
       booking.cardTypeNormalized?.toLowerCase() === 'mastercard' &&
       booking.bookingTypeNormalized === 'Flight'
@@ -259,12 +266,21 @@ export class SimpleFlightMatcher {
 
   /**
    * Filter bookings to only include Mastercard flight bookings
-   * using EXACT matching for direct table comparison
+   * using the EXACT same approach as DataFixerService stats calculation
    */
   private filterFlightBookings(bookings: BookingData[]): BookingData[] {
-    // ULTRA SIMPLE: Filter EXACTLY like the TestReportValues expects
-    // Use direct case-sensitive comparison to match precisely
-    return bookings.filter(booking =>
+    // Create a deep copy to avoid the effects of any post-DataFixerService processing
+    const bookingsClone = JSON.parse(JSON.stringify(bookings));
+
+    // Step 1: Apply card type fixes exactly as DataFixerService would
+    bookingsClone.forEach(booking => {
+      if (booking.rawData && booking.rawData['Credit Card Network'] === 'MasterCard') {
+        booking.cardTypeNormalized = 'Mastercard';
+      }
+    });
+
+    // Step 2: Use exact filtering from DataFixerService's stats calculation
+    return bookingsClone.filter(booking =>
       booking.cardTypeNormalized === 'Mastercard' &&
       booking.bookingTypeNormalized === 'Flight'
     );
