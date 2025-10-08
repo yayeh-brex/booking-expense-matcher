@@ -17,9 +17,16 @@ export class SimpleFlightMatcher {
    * @returns Array of match results
    */
   public findMatches(bookings: BookingData[], expenses: ExpenseData[]): MatchResult[] {
-    // Filter to only Mastercard flight bookings
+    // Filter to only Mastercard flight bookings with EXACT matching
     const flightBookings = this.filterFlightBookings(bookings);
-    console.log(`[SimpleFlightMatcher] Found ${flightBookings.length} Mastercard flight bookings`);
+    console.log(`[SimpleFlightMatcher] Found ${flightBookings.length} bookings with EXACT 'Mastercard'+'Flight' values`);
+
+    // Count with case insensitive matching for comparison
+    const caseInsensitiveCount = bookings.filter(booking =>
+      booking.cardTypeNormalized?.toLowerCase() === 'mastercard' &&
+      booking.bookingTypeNormalized === 'Flight'
+    ).length;
+    console.log(`[SimpleFlightMatcher] Case-insensitive comparison found ${caseInsensitiveCount} bookings`);
 
     // Matches array to return
     const matches: MatchResult[] = [];
@@ -252,16 +259,13 @@ export class SimpleFlightMatcher {
 
   /**
    * Filter bookings to only include Mastercard flight bookings
-   * using strict criteria to match StaticBookingSummary
+   * using EXACT matching for direct table comparison
    */
   private filterFlightBookings(bookings: BookingData[]): BookingData[] {
-    // First filter for Mastercard bookings (case insensitive)
-    const mastercardBookings = bookings.filter(booking =>
-      booking.cardTypeNormalized?.toLowerCase() === 'mastercard'
-    );
-
-    // Then filter for exact 'Flight' bookings (case sensitive, exact match)
-    return mastercardBookings.filter(booking =>
+    // ULTRA SIMPLE: Filter EXACTLY like the TestReportValues expects
+    // Use direct case-sensitive comparison to match precisely
+    return bookings.filter(booking =>
+      booking.cardTypeNormalized === 'Mastercard' &&
       booking.bookingTypeNormalized === 'Flight'
     );
   }
