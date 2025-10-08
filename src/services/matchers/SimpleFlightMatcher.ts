@@ -25,6 +25,12 @@ export class SimpleFlightMatcher {
     );
     console.log(`[SimpleFlightMatcher] Found ${expensesWithCardLast4.length} out of ${expenses.length} expenses with card last 4`);
 
+    // Debug: Show details of expenses with card last 4
+    console.log(`[SimpleFlightMatcher] Expenses with card last 4 details:`);
+    expensesWithCardLast4.slice(0, 10).forEach((expense, idx) => {
+      console.log(`[SimpleFlightMatcher] Expense ${idx}: id=${expense.id}, vendor=${expense.vendor}, amount=${expense.amount}, cardLast4=${expense.cardLast4Normalized}`);
+    });
+
     // Log a sample of expenses to check data quality
     console.log(`[SimpleFlightMatcher] Sampling 5 expenses to check data quality:`);
     expenses.slice(0, 5).forEach((expense, idx) => {
@@ -60,6 +66,48 @@ export class SimpleFlightMatcher {
     flightBookings.slice(0, 5).forEach((booking, idx) => {
       console.log(`[SimpleFlightMatcher] Booking ${idx}: id=${booking.id}, vendor=${booking.merchantNormalized || booking.vendor}, amount=${booking.amountNormalized}, cardLast4=${booking.cardLast4Normalized}`);
     });
+
+    // Count bookings with valid card last 4 digits
+    const bookingsWithCardLast4 = flightBookings.filter(booking =>
+      booking.cardLast4Normalized && booking.cardLast4Normalized !== '[No card last 4 found]'
+    );
+    console.log(`[SimpleFlightMatcher] Found ${bookingsWithCardLast4.length} out of ${flightBookings.length} flight bookings with valid card last 4`);
+
+    // Show card last 4 distribution
+    const cardLast4Distribution = new Map<string, number>();
+    bookingsWithCardLast4.forEach(booking => {
+      const last4 = booking.cardLast4Normalized || '[unknown]';
+      cardLast4Distribution.set(last4, (cardLast4Distribution.get(last4) || 0) + 1);
+    });
+    console.log(`[SimpleFlightMatcher] Card last 4 distribution in bookings:`);
+    Array.from(cardLast4Distribution.entries())
+      .sort((a, b) => b[1] - a[1])  // Sort by frequency, highest first
+      .slice(0, 10)  // Show top 10
+      .forEach(([last4, count]) => {
+        console.log(`[SimpleFlightMatcher]   ${last4}: ${count} bookings`);
+      });
+
+    // Check for potential matches by card last 4
+    console.log(`[SimpleFlightMatcher] Checking for potential matches by card last 4...`);
+    const expenseCardLast4Distribution = new Map<string, number>();
+    expensesWithCardLast4.forEach(expense => {
+      const last4 = expense.cardLast4Normalized || '[unknown]';
+      expenseCardLast4Distribution.set(last4, (expenseCardLast4Distribution.get(last4) || 0) + 1);
+    });
+
+    // Find card last 4 values that exist in both bookings and expenses
+    console.log(`[SimpleFlightMatcher] Common card last 4 digits between bookings and expenses:`);
+    let commonLast4Found = false;
+    for (const [last4, count] of cardLast4Distribution.entries()) {
+      if (expenseCardLast4Distribution.has(last4)) {
+        const expenseCount = expenseCardLast4Distribution.get(last4) || 0;
+        console.log(`[SimpleFlightMatcher]   ${last4}: ${count} bookings, ${expenseCount} expenses - POTENTIAL MATCH`);
+        commonLast4Found = true;
+      }
+    }
+    if (!commonLast4Found) {
+      console.log(`[SimpleFlightMatcher] ⚠️ NO COMMON CARD LAST 4 DIGITS FOUND BETWEEN BOOKINGS AND EXPENSES!`);
+    }
 
     // For each flight booking, try to find the best matching expense
     flightBookings.forEach((booking, bookingIndex) => {
