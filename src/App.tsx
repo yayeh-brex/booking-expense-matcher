@@ -19,6 +19,7 @@ import {
   MatchingProgress
 } from './services/OptimizedMatchingService';
 import FlightsEval from './components/FlightsEval';
+import FlightsNormalizedTable from './components/FlightsNormalizedTable';
 import BookingTypeSummary from './components/BookingTypeSummary';
 import TestTypeSummary from './components/TestTypeSummary';
 import StaticBookingSummary from './components/StaticBookingSummary';
@@ -748,6 +749,17 @@ function App() {
                 getExpenseById={getExpenseById}
                 expectedFlightCount={dataFixerStats.flightCount} // Dynamically pass the count from DataFixerService
               />
+            </div>
+          </Col>
+        </Row>
+      )}
+
+      {/* Flights Normalized Table - Flight Expenses with Key Matching Data */}
+      {parsedExpenses && parsedExpenses.length > 0 && (
+        <Row className="mt-4 mb-4">
+          <Col>
+            <div className="p-4 border rounded bg-light">
+              <FlightsNormalizedTable expenses={parsedExpenses} />
             </div>
           </Col>
         </Row>
