@@ -169,68 +169,173 @@ function extractCardType(expense: ExpenseData): string {
  * Extract last 4 digits of credit card from expense data
  */
 function extractCardLast4(expense: ExpenseData): string {
-  // Common field names for credit card information
+  // Debug: Mark the start of extraction for this expense
+  const expenseId = expense.id || 'unknown';
+  console.log(`[ExpenseParser] Extracting card last 4 for expense ${expenseId}`);
+
+  // Enhanced list of field names for credit card information
   const possibleCardNumberFields = [
-    'card_number', 'cardNumber', 'last4', 'last_four',
-    'payment_method', 'paymentMethod', 'payment_details',
-    'credit_card', 'creditCard'
+    'card_number', 'cardNumber', 'last4', 'last_four', 'last_digits',
+    'payment_method', 'paymentMethod', 'payment_details', 'payment_card',
+    'credit_card', 'creditCard', 'card_details', 'cardDetails',
+    'card', 'account', 'account_number', 'accountNumber',
+    'card_id', 'cardId', 'payment_id', 'paymentId',
+    'card_last4', 'cardLast4', 'pan', 'maskedPan',
+    'payment_instrument', 'paymentInstrument'
   ];
+
+  // More specific expense report field names
+  const expenseReportFields = [
+    'card_last_four', 'last_four_digits', 'expense_card',
+    'expense_payment_method', 'transaction_card',
+    'masked_card', 'masked_number', 'payment_instrument_id'
+  ];
+
+  // Combine all field patterns
+  const allCardFields = [...possibleCardNumberFields, ...expenseReportFields];
+
+  let foundLast4: string | null = null;
 
   if (expense.rawData) {
     const rawData = expense.rawData;
 
-    // First check specific fields for last 4
-    for (const fieldName of possibleCardNumberFields) {
-      for (const key of Object.keys(rawData)) {
-        if (key.toLowerCase().replace(/[_\s-]/g, '') === fieldName.toLowerCase().replace(/[_\s-]/g, '')) {
-          const fieldValue = String(rawData[key] || '');
+    // STRATEGY 1: Direct match on explicit last 4 fields
+    // This is the most reliable method
+    const directMatchFields = ['last4', 'last_four', 'last_four_digits', 'card_last4', 'cardLast4'];
 
-          // Direct match for fields that already contain just last 4
-          if (/^\d{4}$/.test(fieldValue)) {
-            return fieldValue;
+    for (const fieldName of directMatchFields) {
+      for (const key of Object.keys(rawData)) {
+        // More flexible matching to catch variations
+        if (key.toLowerCase().replace(/[_\s-]/g, '').includes(fieldName.toLowerCase().replace(/[_\s-]/g, ''))) {
+          const fieldValue = String(rawData[key] || '').trim();
+
+          // Extract just the digits if there's other text
+          const digitsOnly = fieldValue.replace(/\D/g, '');
+
+          // If it's exactly 4 digits, perfect!
+          if (/^\d{4}$/.test(digitsOnly)) {
+            console.log(`[ExpenseParser] Found direct last4 match in field ${key}: ${digitsOnly}`);
+            return digitsOnly;
           }
 
-          // Try to extract last 4 from masked credit card pattern
-          const last4Match = fieldValue.match(/[X\*\.]+[\s-]*[X\*\.]+[\s-]*[X\*\.]+[\s-]*(\d{4})|[\*\.X]+(\d{4})|[^0-9](\d{4})$/);
-          if (last4Match) {
-            return last4Match[1] || last4Match[2] || last4Match[3];
+          // If we have more digits, take the last 4
+          if (digitsOnly.length > 4) {
+            const last4 = digitsOnly.slice(-4);
+            console.log(`[ExpenseParser] Extracted last 4 from longer number in field ${key}: ${last4}`);
+            foundLast4 = last4;
           }
         }
       }
     }
 
-    // Check description field for card patterns
-    if (expense.description) {
-      // Look for patterns like "XXXX1234" or "ending in 1234" in description
-      const descriptionMatch = expense.description.match(/(?:ending|last|final)\s+(?:in|with|digits|4)?\s*[-:\s]*(\d{4})|\D(\d{4})(?:\s|$)/i);
-      if (descriptionMatch) {
-        return descriptionMatch[1] || descriptionMatch[2];
+    // STRATEGY 2: Check for masked card patterns in all card-related fields
+    if (!foundLast4) {
+      for (const fieldName of allCardFields) {
+        for (const key of Object.keys(rawData)) {
+          if (key.toLowerCase().replace(/[_\s-]/g, '').includes(fieldName.toLowerCase().replace(/[_\s-]/g, ''))) {
+            const fieldValue = String(rawData[key] || '');
+
+            // Enhanced regex for various masked card formats:
+            // - XXXX-XXXX-XXXX-1234
+            // - **** **** **** 1234
+            // - ...1234
+            // - ending in 1234
+            // - XXXXXXXXXXXX1234
+            const maskedPatterns = [
+              // Standard masked format with separators
+              /[X\*\.]+[\s-]*[X\*\.]+[\s-]*[X\*\.]+[\s-]*(\d{4})/,
+              // Continuous masked format
+              /[\*\.X]+(\d{4})/,
+              // "ending in/with" format
+              /(?:ending|last|final)\s+(?:in|with|digits|4)?\s*[-:\s]*(\d{4})/i,
+              // Last 4 digits at end of string after non-digit
+              /[^0-9](\d{4})$/,
+              // PAN format where only last 4 are visible
+              /(?:pan|card).*?(?:\d{0,6}|\*+|\X+)(\d{4})$/i
+            ];
+
+            for (const pattern of maskedPatterns) {
+              const match = fieldValue.match(pattern);
+              if (match && match[1]) {
+                console.log(`[ExpenseParser] Found masked pattern in field ${key}: ${match[1]}`);
+                return match[1];
+              }
+            }
+          }
+        }
       }
     }
 
-    // If still not found, search all fields
+    // STRATEGY 3: Check description field for card patterns
+    if (expense.description) {
+      // Look for patterns like "XXXX1234" or "ending in 1234" in description
+      const descriptionPatterns = [
+        /(?:card|account|payment)\D+(\d{4})(?:\s|$|\.)/i,
+        /(?:ending|last|final)\s+(?:in|with|digits|4)?\s*[-:\s]*(\d{4})/i,
+        /[X\*\.]+[\s-]*[X\*\.]+[\s-]*[X\*\.]+[\s-]*(\d{4})/,
+        /[\*\.X]+(\d{4})/,
+        /\D(\d{4})(?:\s|$|\.)/
+      ];
+
+      for (const pattern of descriptionPatterns) {
+        const match = expense.description.match(pattern);
+        if (match && match[1]) {
+          console.log(`[ExpenseParser] Found card last 4 in description: ${match[1]}`);
+          return match[1];
+        }
+      }
+    }
+
+    // STRATEGY 4: Aggressive search in ANY field that contains certain key terms
     for (const [key, value] of Object.entries(rawData)) {
       if (!value) continue;
 
+      const keyLower = key.toLowerCase();
       const stringValue = String(value);
 
-      // Look for masked credit card patterns
-      const last4Match = stringValue.match(/[X\*\.]+[\s-]*[X\*\.]+[\s-]*[X\*\.]+[\s-]*(\d{4})|[\*\.X]+(\d{4})|(?:ending|last|final)\s+(?:in|with|digits|4)?\s*[-:\s]*(\d{4})/i);
-      if (last4Match) {
-        return last4Match[1] || last4Match[2] || last4Match[3];
+      // Look for fields that might relate to cards, payments, or accounts
+      const isPaymentRelated =
+        keyLower.includes('card') ||
+        keyLower.includes('payment') ||
+        keyLower.includes('transaction') ||
+        keyLower.includes('account') ||
+        keyLower.includes('credit') ||
+        keyLower.includes('expense');
+
+      if (isPaymentRelated) {
+        // Extract all 4-digit sequences from the string
+        const digitMatches = stringValue.match(/\b\d{4}\b/g);
+        if (digitMatches && digitMatches.length > 0) {
+          // Prefer the last 4-digit sequence in the string (most likely to be card last 4)
+          const last4 = digitMatches[digitMatches.length - 1];
+          console.log(`[ExpenseParser] Found potential last 4 in payment-related field ${key}: ${last4}`);
+          foundLast4 = foundLast4 || last4;
+        }
+
+        // Try the masked patterns again
+        const maskedMatch = stringValue.match(/[X\*\.]+[\s-]*[X\*\.]+[\s-]*[X\*\.]+[\s-]*(\d{4})|[\*\.X]+(\d{4})/);
+        if (maskedMatch) {
+          const last4 = maskedMatch[1] || maskedMatch[2];
+          console.log(`[ExpenseParser] Found masked pattern in payment field ${key}: ${last4}`);
+          return last4;
+        }
       }
 
-      // Look for strings that are just 4 digits in card-related fields
+      // Last resort: Check for stand-alone 4 digit numbers in key fields
       if (/^\d{4}$/.test(stringValue)) {
-        if (key.toLowerCase().includes('card') ||
-            key.toLowerCase().includes('payment') ||
-            key.toLowerCase().includes('last')) {
-          return stringValue;
+        if (isPaymentRelated || keyLower.includes('last')) {
+          console.log(`[ExpenseParser] Found standalone 4 digits in relevant field ${key}: ${stringValue}`);
+          foundLast4 = foundLast4 || stringValue;
         }
       }
     }
   }
 
+  if (foundLast4) {
+    return foundLast4;
+  }
+
+  console.log(`[ExpenseParser] No card last 4 found for expense ${expenseId}`);
   return '[No card last 4 found]';
 }
 
