@@ -149,6 +149,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
               <th>Expense User</th>
               <th>Expense Category</th>
               <th>Expense Merchant</th>
+              <th>card_last4_expense</th>
               <th>Expense Amount</th>
               <th>Swipe Time</th>
             </tr>
@@ -199,6 +200,9 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                     <td>{expense?.expenseType || '-'}</td>
                     <td className={matchResult ? styles.textHighlight : ''}>
                       {expense?.vendor || '-'}
+                    </td>
+                    <td className={matchResult ? styles.textHighlight : ''}>
+                      {expense?.cardLast4Normalized || '-'}
                     </td>
                     <td className={matchResult ? styles.textHighlight : ''}>
                       {expense?.amount !== undefined
