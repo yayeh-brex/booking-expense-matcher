@@ -17,6 +17,20 @@ export class SimpleFlightMatcher {
    * @returns Array of match results
    */
   public findMatches(bookings: BookingData[], expenses: ExpenseData[]): MatchResult[] {
+    console.log(`[SimpleFlightMatcher] Starting matching process with ${bookings.length} bookings and ${expenses.length} expenses`);
+
+    // Check if we have expenses with card last 4
+    const expensesWithCardLast4 = expenses.filter(e =>
+      e.cardLast4Normalized && e.cardLast4Normalized !== '[No card last 4 found]'
+    );
+    console.log(`[SimpleFlightMatcher] Found ${expensesWithCardLast4.length} out of ${expenses.length} expenses with card last 4`);
+
+    // Log a sample of expenses to check data quality
+    console.log(`[SimpleFlightMatcher] Sampling 5 expenses to check data quality:`);
+    expenses.slice(0, 5).forEach((expense, idx) => {
+      console.log(`[SimpleFlightMatcher] Expense ${idx}: id=${expense.id}, vendor=${expense.vendor}, amount=${expense.amount}, cardLast4=${expense.cardLast4Normalized}`);
+    });
+
     // Filter using DataFixerService-consistent approach
     const flightBookings = this.filterFlightBookings(bookings);
     console.log(`[SimpleFlightMatcher] Using DataFixerService-consistent approach: Found ${flightBookings.length} bookings`);
@@ -41,6 +55,12 @@ export class SimpleFlightMatcher {
     // Keep track of which expenses have been matched
     const matchedExpenses = new Set<string>();
 
+    // Sample a few bookings to check card last 4
+    console.log(`[SimpleFlightMatcher] Sampling 5 bookings to check card last 4:`);
+    flightBookings.slice(0, 5).forEach((booking, idx) => {
+      console.log(`[SimpleFlightMatcher] Booking ${idx}: id=${booking.id}, vendor=${booking.merchantNormalized || booking.vendor}, amount=${booking.amountNormalized}, cardLast4=${booking.cardLast4Normalized}`);
+    });
+
     // For each flight booking, try to find the best matching expense
     flightBookings.forEach((booking, bookingIndex) => {
       // Important: We need both identifiers:
@@ -59,15 +79,37 @@ export class SimpleFlightMatcher {
       }
 
       // Score each expense against this booking
+      console.log(`[SimpleFlightMatcher] Booking ${bookingRef} has card last 4: ${booking.cardLast4Normalized}`);
+
+      // Count how many expenses might be candidates for this booking
+      const potentialMatches = expenses.filter(expense =>
+        expense.cardLast4Normalized &&
+        expense.cardLast4Normalized !== '[No card last 4 found]' &&
+        expense.cardLast4Normalized === booking.cardLast4Normalized
+      ).length;
+      console.log(`[SimpleFlightMatcher] Booking ${bookingRef} has ${potentialMatches} expenses with matching card last 4`);
+
       const scoredExpenses = expenses
         .filter(expense => {
           // Skip already matched expenses
           const expenseId = expense.id || `expense-${expenses.indexOf(expense)}`;
-          if (matchedExpenses.has(expenseId)) return false;
+          if (matchedExpenses.has(expenseId)) {
+            console.log(`[SimpleFlightMatcher] Expense ${expenseId} already matched to another booking`);
+            return false;
+          }
 
           // Must have card last 4 data
-          return expense.cardLast4Normalized &&
-                 expense.cardLast4Normalized !== '[No card last 4 found]';
+          if (!expense.cardLast4Normalized || expense.cardLast4Normalized === '[No card last 4 found]') {
+            return false;
+          }
+
+          // Debug: log when we find a potential card last 4 match
+          if (expense.cardLast4Normalized === booking.cardLast4Normalized) {
+            console.log(`[SimpleFlightMatcher] Found potential match: Booking ${bookingRef} and Expense ${expenseId} both have card last 4: ${expense.cardLast4Normalized}`);
+            return true;
+          }
+
+          return false;
         })
         .map(expense => {
           const expenseId = expense.id || `expense-${expenses.indexOf(expense)}`;
