@@ -98,13 +98,16 @@ export class SimpleFlightMatcher {
     // Find card last 4 values that exist in both bookings and expenses
     console.log(`[SimpleFlightMatcher] Common card last 4 digits between bookings and expenses:`);
     let commonLast4Found = false;
-    for (const [last4, count] of cardLast4Distribution.entries()) {
+
+    // Convert iterator to array to avoid TypeScript error
+    Array.from(cardLast4Distribution.entries()).forEach(([last4, count]) => {
       if (expenseCardLast4Distribution.has(last4)) {
         const expenseCount = expenseCardLast4Distribution.get(last4) || 0;
         console.log(`[SimpleFlightMatcher]   ${last4}: ${count} bookings, ${expenseCount} expenses - POTENTIAL MATCH`);
         commonLast4Found = true;
       }
-    }
+    });
+
     if (!commonLast4Found) {
       console.log(`[SimpleFlightMatcher] ⚠️ NO COMMON CARD LAST 4 DIGITS FOUND BETWEEN BOOKINGS AND EXPENSES!`);
     }
