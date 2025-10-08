@@ -25,17 +25,51 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   // State to store our own flight-specific matches using the simple matcher
   const [flightMatches, setFlightMatches] = useState<MatchResult[]>([]);
 
-  // Initialize the simple flight matcher when component loads
+  // State to store filtered flight bookings - this is the key fix
+  const [flightBookings, setFlightBookings] = useState<BookingData[]>([]);
+
+  // Initialize the simple flight matcher and filter bookings when component loads
   useEffect(() => {
+    console.log(`DEBUG: [FlightsEval] Advanced debugging to solve the 705 count issue...`);
+
+    // Filter bookings to find Mastercard + Flight bookings
+    // This specifically applies DataFixerService-style filtering, ignoring any post-processing
+    const filteredBookings = bookings
+      .filter(booking => {
+        // Check for required Flight type
+        const isFlightType = booking.bookingTypeNormalized === 'Flight';
+
+        // Check for Mastercard, or if needs fixing based on 'Credit Card Network' === 'MasterCard'
+        const isMastercardAlready = booking.cardTypeNormalized === 'Mastercard';
+        const needsMastercardFix = booking.rawData &&
+                                  booking.rawData['Credit Card Network'] === 'MasterCard';
+
+        return isFlightType && (isMastercardAlready || needsMastercardFix);
+      })
+      .map(booking => {
+        // Create a shallow copy with spread operator
+        const result = { ...booking };
+
+        // Apply Mastercard fix if needed
+        if (result.rawData && result.rawData['Credit Card Network'] === 'MasterCard') {
+          result.cardTypeNormalized = 'Mastercard';
+        }
+
+        return result;
+      });
+
+    // Save filtered bookings to state
+    setFlightBookings(filteredBookings);
+    console.log(`DEBUG: [FlightsEval] Using filtered data approach: Found ${filteredBookings.length} Mastercard+Flight bookings`);
+
     // Create matcher instance
     const flightMatcher = new SimpleFlightMatcher();
 
-    // Find matches using our simplified approach
-    const matches = flightMatcher.findMatches(bookings, expenses);
+    // Find matches using our simplified approach with the filtered bookings
+    const matches = flightMatcher.findMatches(filteredBookings, expenses);
 
     // Update state with matches
     setFlightMatches(matches);
-
     console.log(`[FlightsEval] Found ${matches.length} matches using SimpleFlightMatcher`);
   }, [bookings, expenses]);
 
@@ -43,53 +77,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage] = useState<number>(10);
 
-  // =====================================================================
-  // FIXED DATA PROCESSING ISSUE: Use clone of original data before post-processing
-  // =====================================================================
-
-  console.log(`DEBUG: [FlightsEval] Advanced debugging to solve the 705 count issue...`);
-
-  // Filter bookings to find Mastercard + Flight bookings without deep cloning
-  // This specifically applies DataFixerService-style filtering, ignoring any post-processing
-
-  // First, identify bookings that match our criteria
-  const flightBookings = bookings
-    .filter(booking => {
-      // Check for required Flight type
-      const isFlightType = booking.bookingTypeNormalized === 'Flight';
-
-      // Check for Mastercard, or if needs fixing based on 'Credit Card Network' === 'MasterCard'
-      const isMastercardAlready = booking.cardTypeNormalized === 'Mastercard';
-      const needsMastercardFix = booking.rawData &&
-                                 booking.rawData['Credit Card Network'] === 'MasterCard';
-
-      return isFlightType && (isMastercardAlready || needsMastercardFix);
-    })
-    .map(booking => {
-      // Create a shallow copy with spread operator
-      const result = { ...booking };
-
-      // Apply Mastercard fix if needed
-      if (result.rawData && result.rawData['Credit Card Network'] === 'MasterCard') {
-        result.cardTypeNormalized = 'Mastercard';
-      }
-
-      return result;
-    });
-
-  console.log(`DEBUG: [FlightsEval] Using cloned data approach: Found ${flightBookings.length} Mastercard+Flight bookings`);
-
-  // Additional debugging counts
-  const originalCount = bookings.filter(booking =>
-    booking.cardTypeNormalized === 'Mastercard' &&
-    booking.bookingTypeNormalized === 'Flight'
-  ).length;
-
-  console.log(`DEBUG: [FlightsEval] Original data approach: Found ${originalCount} Mastercard+Flight bookings`);
-  console.log(`DEBUG: [FlightsEval] Difference between approaches: ${originalCount - flightBookings.length} bookings`);
-
-  // Direct comparison with TestReportValues expected values
-  console.log(`DEBUG: Exact values expected by TestReportValues:`);
+  // Additional debugging counts for comparison with TestReportValues expected values
   console.log(`  Total bookings: 1670`);
   console.log(`  Mastercard: 934`);
   console.log(`  Flight: 705`);
