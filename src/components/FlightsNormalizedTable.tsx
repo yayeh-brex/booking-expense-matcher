@@ -58,8 +58,6 @@ const FlightsNormalizedTable: React.FC<FlightsNormalizedTableProps> = ({ expense
               <th>Currency</th>
               <th>Expense Date</th>
               <th>Expense Type</th>
-              <th>Description</th>
-              <th>Booking Reference</th>
             </tr>
           </thead>
           <tbody>
@@ -99,14 +97,6 @@ const FlightsNormalizedTable: React.FC<FlightsNormalizedTableProps> = ({ expense
                   <td>{expense.currency || '[No currency]'}</td>
                   <td>{expense.expenseDate || '[No date]'}</td>
                   <td>{expense.expenseType || '[No type]'}</td>
-                  <td>{expense.description ?
-                    (expense.description.length > 50
-                      ? `${expense.description.substring(0, 47)}...`
-                      : expense.description)
-                    : '[No description]'}</td>
-                  <td className={bookingRef ? styles.textHighlight : ''}>
-                    {bookingRef || expense.bookingRefNormalized || '[Not found]'}
-                  </td>
                 </tr>
               );
             })}
