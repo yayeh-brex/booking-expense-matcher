@@ -43,35 +43,23 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage] = useState<number>(10);
 
-  // Filter only Mastercard flight bookings
+  // Filter only Mastercard flight bookings using STRICT matching to match StaticBookingSummary
   console.log(`DEBUG: [FlightsEval] Filtering Mastercard flight bookings from ${bookings.length} total bookings`);
-  const flightBookings = bookings.filter(booking => {
-    // Must be a flight booking
-    const isFlightBooking = (
-      // Check normalized type
-      booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-      // Check travel type for flight keywords
-      booking.travelType?.toLowerCase()?.includes('flight') ||
-      booking.travelType?.toLowerCase()?.includes('air') ||
-      // Check merchant/vendor for airline names
-      booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
-      booking.vendor?.toLowerCase()?.includes('airline') ||
-      booking.vendor?.toLowerCase()?.includes('airways') ||
-      // Check for common airline names
-      booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('united') ||
-      booking.merchantNormalized?.toLowerCase()?.includes('american') ||
-      // Check origin/destination (flights typically have both)
-      (booking.origin && booking.destination)
-    );
 
-    // Must also be a Mastercard booking (case insensitive comparison)
-    const isMastercard = booking.cardTypeNormalized?.toLowerCase() === 'mastercard';
+  // First, filter for Mastercard bookings exactly like StaticBookingSummary does
+  const mastercardBookings = bookings.filter(booking =>
+    booking.cardTypeNormalized?.toLowerCase() === 'mastercard'
+  );
 
-    // Return true only if both conditions are met
-    return isFlightBooking && isMastercard;
-  });
+  // Then filter for exact 'Flight' value in bookingTypeNormalized
+  const flightBookings = mastercardBookings.filter(booking =>
+    booking.bookingTypeNormalized === 'Flight'
+  );
+
+  console.log(`DEBUG: [FlightsEval] Filtered to ${mastercardBookings.length} Mastercard bookings total`);
+  console.log(`DEBUG: [FlightsEval] Filtered to ${flightBookings.length} Mastercard Flight bookings (strict match)`);
+
+  // This should now match the 705 count from StaticBookingSummary
 
   // Debug: Count all flight bookings vs. Mastercard flight bookings
   const allFlightBookings = bookings.filter(booking => (

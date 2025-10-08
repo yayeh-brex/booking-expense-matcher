@@ -252,35 +252,18 @@ export class SimpleFlightMatcher {
 
   /**
    * Filter bookings to only include Mastercard flight bookings
+   * using strict criteria to match StaticBookingSummary
    */
   private filterFlightBookings(bookings: BookingData[]): BookingData[] {
-    return bookings.filter(booking => {
-      // Must be a flight booking
-      const isFlightBooking = (
-        // Check normalized type
-        booking.bookingTypeNormalized?.toLowerCase() === 'flight' ||
-        // Check travel type for flight keywords
-        booking.travelType?.toLowerCase()?.includes('flight') ||
-        booking.travelType?.toLowerCase()?.includes('air') ||
-        // Check merchant/vendor for airline names
-        booking.merchantNormalized?.toLowerCase()?.includes('airline') ||
-        booking.merchantNormalized?.toLowerCase()?.includes('airways') ||
-        booking.vendor?.toLowerCase()?.includes('airline') ||
-        booking.vendor?.toLowerCase()?.includes('airways') ||
-        // Check for common airline names
-        booking.merchantNormalized?.toLowerCase()?.includes('delta') ||
-        booking.merchantNormalized?.toLowerCase()?.includes('united') ||
-        booking.merchantNormalized?.toLowerCase()?.includes('american') ||
-        // Check origin/destination (flights typically have both)
-        (booking.origin && booking.destination)
-      );
+    // First filter for Mastercard bookings (case insensitive)
+    const mastercardBookings = bookings.filter(booking =>
+      booking.cardTypeNormalized?.toLowerCase() === 'mastercard'
+    );
 
-      // Must also be a Mastercard booking (case insensitive comparison)
-      const isMastercard = booking.cardTypeNormalized?.toLowerCase() === 'mastercard';
-
-      // Return true only if both conditions are met
-      return isFlightBooking && isMastercard;
-    });
+    // Then filter for exact 'Flight' bookings (case sensitive, exact match)
+    return mastercardBookings.filter(booking =>
+      booking.bookingTypeNormalized === 'Flight'
+    );
   }
 
   /**
