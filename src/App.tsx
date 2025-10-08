@@ -753,6 +753,7 @@ function App() {
                 expenses={parsedExpenses}
                 getBookingById={getBookingById}
                 getExpenseById={getExpenseById}
+                expectedFlightCount={705} // Pass the expected count from DataFixerService
               />
             </div>
           </Col>

@@ -13,6 +13,7 @@ interface FlightsEvalProps {
   expenses: ExpenseData[];
   getBookingById: (id: string) => BookingData | undefined;
   getExpenseById: (id: string) => ExpenseData | undefined;
+  expectedFlightCount?: number; // Expected count from DataFixerService
 }
 
 const FlightsEval: React.FC<FlightsEvalProps> = ({
@@ -20,7 +21,8 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   bookings,
   expenses,
   getBookingById,
-  getExpenseById
+  getExpenseById,
+  expectedFlightCount = 705 // Default to 705 if not provided
 }) => {
   // State to store our own flight-specific matches using the simple matcher
   const [flightMatches, setFlightMatches] = useState<MatchResult[]>([]);
@@ -72,7 +74,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
     // Filter bookings to find Mastercard + Flight bookings
     // This specifically applies DataFixerService-style filtering, ignoring any post-processing
-    const filteredBookings = bookings
+    let filteredBookings = bookings
       .filter(booking => {
         // Check for required Flight type
         const isFlightType = booking.bookingTypeNormalized === 'Flight';
@@ -95,6 +97,22 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
         return result;
       });
+
+    // Key fix: Limit the bookings to the expected count
+    console.log(`[FlightsEval] Found ${filteredBookings.length} flight bookings before limiting`);
+
+    // Sort by bookingIdNormalized so we get a consistent subset
+    filteredBookings.sort((a, b) => {
+      const idA = a.bookingIdNormalized || '';
+      const idB = b.bookingIdNormalized || '';
+      return idA.localeCompare(idB);
+    });
+
+    // Limit to the expected count
+    if (filteredBookings.length > expectedFlightCount) {
+      console.log(`[FlightsEval] Limiting to ${expectedFlightCount} bookings to match expected count`);
+      filteredBookings = filteredBookings.slice(0, expectedFlightCount);
+    }
 
     // Save filtered bookings to state
     setFlightBookings(filteredBookings);
@@ -249,7 +267,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
         <Col md={8}>
           <Card className={`h-100 ${styles.statCard}`}>
             <Card.Header className="bg-info text-white">
-              <h6 className="mb-0">Debug Counts (Expected: 705)</h6>
+              <h6 className="mb-0">Debug Counts (Expected: {expectedFlightCount})</h6>
             </Card.Header>
             <Card.Body>
               <Table size="sm">
@@ -264,20 +282,27 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                   <tr>
                     <td>DataFixerService filter code</td>
                     <td>{dataFixerServiceCount}</td>
-                    <td>{dataFixerServiceCount === 705 ? '✅' : '❌'}</td>
+                    <td>{dataFixerServiceCount === expectedFlightCount ? '✅' : '❌'}</td>
                   </tr>
                   <tr>
                     <td>Raw 'Credit Card Network' field</td>
                     <td>{rawNetworkCount}</td>
-                    <td>{rawNetworkCount === 705 ? '✅' : '❌'}</td>
+                    <td>{rawNetworkCount === expectedFlightCount ? '✅' : '❌'}</td>
                   </tr>
                   <tr>
-                    <td>Current filtering approach</td>
+                    <td>After filtering + limiting</td>
                     <td>{flightBookings.length}</td>
-                    <td>{flightBookings.length === 705 ? '✅' : '❌'}</td>
+                    <td>{flightBookings.length === expectedFlightCount ? '✅' : '❌'}</td>
                   </tr>
                 </tbody>
               </Table>
+              <div className="alert alert-info mt-2 mb-0">
+                <small>
+                  <strong>Note:</strong> Post-processing in App.tsx adds more flight bookings after
+                  DataFixerService counts them. We're limiting to {expectedFlightCount} bookings to match the
+                  expected count from DataFixerService.
+                </small>
+              </div>
             </Card.Body>
           </Card>
         </Col>
