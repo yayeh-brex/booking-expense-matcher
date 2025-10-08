@@ -30,17 +30,17 @@ export class SimpleFlightMatcher {
     // For each flight booking, try to find the best matching expense
     flightBookings.forEach((booking, bookingIndex) => {
       // Important: We need both identifiers:
-      // 1. The unique identifier for the Eval Table row
-      const uniqueId = booking.id || `booking-${bookingIndex}`;
+      // 1. The booking ref for the Bookings Normalized Table row
+      const bookingRef = booking.id || `booking-${bookingIndex}`;
 
       // 2. The Booking_ID_Normalized from the original booking data
       const bookingIdNormalized = booking.bookingIdNormalized || '[No booking ID found]';
 
-      console.log(`[SimpleFlightMatcher] Processing booking with Unique ID: ${uniqueId}, Booking_ID_Normalized: ${bookingIdNormalized}`);
+      console.log(`[SimpleFlightMatcher] Processing booking with Booking Ref: ${bookingRef}, Booking_ID_Normalized: ${bookingIdNormalized}`);
 
       // Skip if booking doesn't have card last 4 (our primary matching criterion)
       if (!booking.cardLast4Normalized || booking.cardLast4Normalized === '[No card last 4 found]') {
-        console.log(`[SimpleFlightMatcher] Booking ${uniqueId} skipped - no card last 4`);
+        console.log(`[SimpleFlightMatcher] Booking ${bookingRef} skipped - no card last 4`);
         return;
       }
 
@@ -76,11 +76,11 @@ export class SimpleFlightMatcher {
       if (bestMatch && bestMatch.score >= MINIMUM_CONFIDENCE) {
         // Add to matches - here we store three pieces of information:
         // 1. expenseId: The ID from the expense report
-        // 2. bookingId: The Unique Identifier from the Eval Table
+        // 2. bookingId: The Booking Ref from the Bookings Normalized Table
         // 3. We can include the bookingIdNormalized in the match reasons
         matches.push({
           expenseId: bestMatch.expenseId,
-          bookingId: uniqueId,
+          bookingId: bookingRef,
           matchConfidence: bestMatch.score,
           matchReason: [
             ...bestMatch.reasons,
@@ -91,10 +91,10 @@ export class SimpleFlightMatcher {
         // Mark expense as matched
         matchedExpenses.add(bestMatch.expenseId);
 
-        console.log(`[SimpleFlightMatcher] Matched booking ${uniqueId} to expense ${bestMatch.expenseId} with confidence ${bestMatch.score.toFixed(2)}`);
+        console.log(`[SimpleFlightMatcher] Matched booking ${bookingRef} to expense ${bestMatch.expenseId} with confidence ${bestMatch.score.toFixed(2)}`);
         console.log(`[SimpleFlightMatcher] This links to original booking ID: ${bookingIdNormalized}`);
       } else {
-        console.log(`[SimpleFlightMatcher] No match found for booking ${uniqueId}`);
+        console.log(`[SimpleFlightMatcher] No match found for booking ${bookingRef}`);
       }
     });
 

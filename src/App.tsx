@@ -742,7 +742,7 @@ function App() {
         <Row className="mt-4 mb-4">
           <Col>
             <div className="p-4 border rounded bg-light">
-              <h4 className="mb-3">Flights Eval Table</h4>
+              <h4 className="mb-3">Flights Bookings Normalized Table</h4>
               <p className="text-muted">
                 This table shows all flight bookings with matching confidence and expense data when available.
                 Bookings without matches show "Unmatched" in the confidence column.
@@ -759,12 +759,12 @@ function App() {
         </Row>
       )}
 
-      {/* Eval Table Section */}
+      {/* Bookings Normalized Table Section */}
       {parsedBookings && parsedBookings.length > 0 && (
         <Row className="mt-4">
           <Col md={12}>
             <div className="p-4 border rounded bg-light">
-              <h4>Eval Table</h4>
+              <h4>Bookings Normalized Table</h4>
               <p>TMC: {selectedTMC}</p>
               <p>Number of bookings: {parsedBookings.length}</p>
 
@@ -787,7 +787,7 @@ function App() {
                 <Table striped bordered hover className="mt-3">
                   <thead>
                     <tr>
-                      <th>Unique Identifier</th>
+                      <th>Booking Ref</th>
                       <th>Booking_ID_Normalized</th>
                       <th>BookingType_Normalized</th>
                       <th>Booking_Merchant_Normalized</th>

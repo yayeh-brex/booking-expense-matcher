@@ -67,12 +67,12 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
   console.log(`DEBUG: [FlightsEval] Found ${flightBookings.length} flight bookings`);
 
   // Create maps for looking up matches by different IDs
-  const matchesByUniqueId = new Map<string, MatchResult>();
+  const matchesByBookingRef = new Map<string, MatchResult>();
   const matchesByExpenseId = new Map<string, MatchResult>();
 
   flightMatches.forEach(match => {
-    // Map by unique identifier (booking ID in the Eval Table)
-    matchesByUniqueId.set(match.bookingId, match);
+    // Map by booking ref (booking ID in the Bookings Normalized Table)
+    matchesByBookingRef.set(match.bookingId, match);
 
     // Map by expense ID
     matchesByExpenseId.set(match.expenseId, match);
@@ -80,7 +80,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
   // Statistics about matches
   const matchedFlightBookingsCount = flightBookings.filter(booking =>
-    booking.id && matchesByUniqueId.has(booking.id)
+    booking.id && matchesByBookingRef.has(booking.id)
   ).length;
 
   const unmatchedFlightBookingsCount = flightBookings.length - matchedFlightBookingsCount;
@@ -133,7 +133,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
           <thead>
             <tr>
               <th>Match Confidence</th>
-              <th>Unique Identifier</th>
+              <th>Booking Ref</th>
               <th>Booking ID Normalized</th>
               <th>BookingType</th>
               <th>Booking Merchant</th>
@@ -157,9 +157,9 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
             {flightBookings
               .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
               .map((booking, index) => {
-                // Find matching result if any using the unique identifier
-                const uniqueId = booking.id || `booking-${index}`;
-                const matchResult = uniqueId ? matchesByUniqueId.get(uniqueId) : undefined;
+                // Find matching result if any using the booking ref
+                const bookingRef = booking.id || `booking-${index}`;
+                const matchResult = bookingRef ? matchesByBookingRef.get(bookingRef) : undefined;
 
                 // Get expense data if there's a match
                 const expense = matchResult?.expenseId ? getExpenseById(matchResult.expenseId) : undefined;
@@ -175,7 +175,7 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
                         <Badge bg="secondary">Unmatched</Badge>
                       )}
                     </td>
-                    <td className={styles.textHighlight}>{uniqueId}</td>
+                    <td className={styles.textHighlight}>{bookingRef}</td>
                     <td>{booking.bookingIdNormalized || '[No booking ID found]'}</td>
                     <td>{booking.bookingTypeNormalized || 'Flight'}</td>
                     <td>{booking.merchantNormalized || booking.vendor || '[No merchant found]'}</td>
