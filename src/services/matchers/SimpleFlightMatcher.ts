@@ -269,21 +269,31 @@ export class SimpleFlightMatcher {
    * using the EXACT same approach as DataFixerService stats calculation
    */
   private filterFlightBookings(bookings: BookingData[]): BookingData[] {
-    // Create a deep copy to avoid the effects of any post-DataFixerService processing
-    const bookingsClone = JSON.parse(JSON.stringify(bookings));
+    // Create a filtered array without modifying the original bookings
+    // First, filter for potential candidates
+    const filteredBookings = bookings.filter(booking => {
+      // Check for required Flight type
+      const isFlightType = booking.bookingTypeNormalized === 'Flight';
 
-    // Step 1: Apply card type fixes exactly as DataFixerService would
-    bookingsClone.forEach(booking => {
-      if (booking.rawData && booking.rawData['Credit Card Network'] === 'MasterCard') {
-        booking.cardTypeNormalized = 'Mastercard';
-      }
+      // Check for Mastercard, or if needs fixing
+      const isMastercardAlready = booking.cardTypeNormalized === 'Mastercard';
+      const needsMastercardFix = booking.rawData &&
+                                 booking.rawData['Credit Card Network'] === 'MasterCard';
+
+      return isFlightType && (isMastercardAlready || needsMastercardFix);
     });
 
-    // Step 2: Use exact filtering from DataFixerService's stats calculation
-    return bookingsClone.filter(booking =>
-      booking.cardTypeNormalized === 'Mastercard' &&
-      booking.bookingTypeNormalized === 'Flight'
-    );
+    // Now create a clean array with just what we need
+    return filteredBookings.map(booking => {
+      const result = { ...booking };
+
+      // Apply Mastercard fix if needed
+      if (result.rawData && result.rawData['Credit Card Network'] === 'MasterCard') {
+        result.cardTypeNormalized = 'Mastercard';
+      }
+
+      return result;
+    });
   }
 
   /**

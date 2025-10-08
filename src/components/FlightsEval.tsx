@@ -49,25 +49,33 @@ const FlightsEval: React.FC<FlightsEvalProps> = ({
 
   console.log(`DEBUG: [FlightsEval] Advanced debugging to solve the 705 count issue...`);
 
-  // Create a deep copy of the bookings data to avoid the effects of post-processing
-  const bookingsClone = JSON.parse(JSON.stringify(bookings));
+  // Filter bookings to find Mastercard + Flight bookings without deep cloning
+  // This specifically applies DataFixerService-style filtering, ignoring any post-processing
 
-  // This specifically applies DataFixerService-style filtering, ignoring any post-processing:
-  // 1. Apply the data fixes that DataFixerService would apply
-  // 2. Then use the EXACT SAME filtering as in DataFixerService's stats calculation
+  // First, identify bookings that match our criteria
+  const flightBookings = bookings
+    .filter(booking => {
+      // Check for required Flight type
+      const isFlightType = booking.bookingTypeNormalized === 'Flight';
 
-  // Step 1: Apply card type fixes (based on 'Credit Card Network' === 'MasterCard')
-  bookingsClone.forEach(booking => {
-    if (booking.rawData && booking.rawData['Credit Card Network'] === 'MasterCard') {
-      booking.cardTypeNormalized = 'Mastercard';
-    }
-  });
+      // Check for Mastercard, or if needs fixing based on 'Credit Card Network' === 'MasterCard'
+      const isMastercardAlready = booking.cardTypeNormalized === 'Mastercard';
+      const needsMastercardFix = booking.rawData &&
+                                 booking.rawData['Credit Card Network'] === 'MasterCard';
 
-  // Step 2: Apply exact filtering from DataFixerService's stats calculation
-  const flightBookings = bookingsClone.filter(booking =>
-    booking.cardTypeNormalized === 'Mastercard' &&
-    booking.bookingTypeNormalized === 'Flight'
-  );
+      return isFlightType && (isMastercardAlready || needsMastercardFix);
+    })
+    .map(booking => {
+      // Create a shallow copy with spread operator
+      const result = { ...booking };
+
+      // Apply Mastercard fix if needed
+      if (result.rawData && result.rawData['Credit Card Network'] === 'MasterCard') {
+        result.cardTypeNormalized = 'Mastercard';
+      }
+
+      return result;
+    });
 
   console.log(`DEBUG: [FlightsEval] Using cloned data approach: Found ${flightBookings.length} Mastercard+Flight bookings`);
 
