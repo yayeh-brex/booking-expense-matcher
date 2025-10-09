@@ -1,66 +1,39 @@
 import { ExpenseData } from '../types/ExpenseData';
 
-// Basic function to parse expense data from CSV
+/**
+ * Parses expense data from CSV with a completely new approach.
+ * This function preserves the raw data and directly accesses column values
+ * without trying to map or normalize them.
+ */
 export function parseExpenseData(rawData: Record<string, any>[]): ExpenseData[] {
-  console.log(`[ExpenseParser] Starting to parse ${rawData.length} expense records`);
+  console.log(`[ExpenseParser] Starting to parse ${rawData.length} expense records with new approach`);
 
-  // Debug: Log the keys of the first row to see what columns are available
+  // Debug: Print all available columns from the first row to understand the data structure
   if (rawData.length > 0) {
     console.log('[ExpenseParser] Available columns in expense data:');
-    console.log(Object.keys(rawData[0]));
+    const columns = Object.keys(rawData[0]);
+    columns.forEach(col => console.log(`- "${col}"`));
   }
 
   return rawData.map((row, index) => {
-    // Debug: For the first few rows, log all fields to help identify expense ID
-    if (index < 3) {
-      console.log(`[ExpenseParser] Row ${index} data:`, JSON.stringify(row, null, 2));
-    }
+    // Keep a reference to the original raw data
+    const rawDataRow = { ...row };
 
-    // Look for actual expense ID in the data, prioritizing fields starting with "expense_"
-    const expenseId = findExpenseId(row);
-    const finalId = expenseId || `expense-${index}`;
-
-    // Debug log whether we found a real ID or had to use the fallback
-    if (expenseId) {
-      console.log(`[ExpenseParser] Row ${index}: Found real expense ID: ${expenseId}`);
-    } else {
-      console.log(`[ExpenseParser] Row ${index}: Using fallback ID: ${finalId}`);
-    }
-
-    // Basic expense data
+    // Create a basic expense object, keeping all properties optional
     const expense: ExpenseData = {
-      id: finalId,
-
-      // Try to map common expense fields
-      expenseDate: findField(row, ['expense_date', 'date', 'transaction_date', 'posted_date']),
-      expenseType: findField(row, ['expense_type', 'category', 'type', 'expense_category']),
-      vendor: findField(row, ['merchant', 'vendor', 'merchant_name', 'vendor_name']),
-      amount: parseAmount(findField(row, ['amount', 'total', 'expense_amount', 'transaction_amount'])),
-      currency: findField(row, ['currency', 'currency_code']),
-      employeeName: findField(row, ['employee', 'employee_name', 'cardholder', 'cardholder_name']),
-      expenseReportId: findField(row, ['report_id', 'expense_report', 'report_number']),
-      description: findField(row, ['description', 'memo', 'notes', 'purpose']),
-      origin: findField(row, ['origin', 'from', 'departure']),
-      destination: findField(row, ['destination', 'to', 'arrival']),
-      startDate: findField(row, ['start_date', 'from_date', 'departure_date']),
-      endDate: findField(row, ['end_date', 'to_date', 'return_date']),
-      receiptAttached: parseBoolean(findField(row, ['receipt', 'has_receipt', 'receipt_attached'])),
-      status: findField(row, ['status', 'expense_status']),
-      rawData: row
+      // Store the raw data for direct access in components
+      rawData: rawDataRow
     };
 
-    // Extract booking reference from description or reference fields
-    if (expense.description) {
-      const bookingRef = extractBookingReference(expense);
-      if (bookingRef) {
-        expense.bookingRefNormalized = bookingRef;
-      }
+    // Store the index for debugging
+    expense.index = index;
+
+    // Log the first few rows completely for debugging
+    if (index < 2) {
+      console.log(`[ExpenseParser] Row ${index} full data:`, JSON.stringify(rawDataRow, null, 2));
     }
 
-    // Extract card type information
-    expense.cardTypeNormalized = extractCardType(expense);
-
-    // Extract card last 4 digits
+    // Extract card last 4 digits (critical for matching)
     expense.cardLast4Normalized = extractCardLast4(expense);
 
     return expense;
