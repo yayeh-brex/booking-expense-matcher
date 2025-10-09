@@ -5,8 +5,8 @@ export function parseExpenseData(rawData: Record<string, any>[]): ExpenseData[] 
   return rawData.map((row, index) => {
     // Basic expense data
     const expense: ExpenseData = {
-      // Look for actual expense ID in the data, fallback to index if not found
-      id: findField(row, ['expense_id', 'id', 'expense_number', 'transaction_id', 'receipt_id']) || `expense-${index}`,
+      // Look for actual expense ID in the data, prioritizing fields starting with "expense_"
+      id: findExpenseId(row) || `expense-${index}`,
 
       // Try to map common expense fields
       expenseDate: findField(row, ['expense_date', 'date', 'transaction_date', 'posted_date']),
@@ -337,6 +337,49 @@ function extractCardLast4(expense: ExpenseData): string {
 
   console.log(`[ExpenseParser] No card last 4 found for expense ${expenseId}`);
   return '[No card last 4 found]';
+}
+
+/**
+ * Specialized function to find expense ID from raw data
+ * Prioritizes fields that start with "expense_" as per the clue
+ */
+function findExpenseId(row: Record<string, any>): string {
+  // Get all keys in lowercase for case-insensitive matching
+  const allKeys = Object.keys(row);
+  const lowerKeys = allKeys.map(key => key.toLowerCase());
+
+  // First priority: Look for fields starting with "expense_"
+  for (let i = 0; i < lowerKeys.length; i++) {
+    const lowerKey = lowerKeys[i];
+    const originalKey = allKeys[i];
+
+    if (lowerKey.startsWith('expense_') && row[originalKey]) {
+      console.log(`[ExpenseParser] Found expense ID in field starting with expense_: ${originalKey} = ${row[originalKey]}`);
+      return row[originalKey].toString();
+    }
+  }
+
+  // Second priority: Check for common expense ID field names
+  const commonExpenseIdFields = [
+    'expense_id', 'expenseid', 'expense_number', 'expensenumber',
+    'expense_key', 'expensekey', 'id', 'transaction_id', 'transactionid',
+    'receipt_id', 'receiptid', 'record_id', 'recordid'
+  ];
+
+  for (const field of commonExpenseIdFields) {
+    for (let i = 0; i < lowerKeys.length; i++) {
+      const lowerKey = lowerKeys[i];
+      const originalKey = allKeys[i];
+
+      if (lowerKey.includes(field) && row[originalKey]) {
+        console.log(`[ExpenseParser] Found expense ID in common field: ${originalKey} = ${row[originalKey]}`);
+        return row[originalKey].toString();
+      }
+    }
+  }
+
+  // No expense ID found
+  return '';
 }
 
 // Helper function to find a field in the raw data using multiple possible column names
